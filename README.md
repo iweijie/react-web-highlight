@@ -1,2 +1,2 @@
 # text-highlight
-web 文本划线高亮
+web富文本划线高亮
