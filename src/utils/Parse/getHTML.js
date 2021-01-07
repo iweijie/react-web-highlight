@@ -1,4 +1,5 @@
-import { isEmpty, get } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import get from 'lodash/get';
 import { unescape, escape, resolveIntersection } from './tool';
 
 const endStr = '</span>';
@@ -37,66 +38,70 @@ const getAstToHTML = ast => {
     .join('');
 };
 
-const translateAstNodes = ({ ast, list = [] }) => {
+const translateAstNodes = ({ ast, option = [] }) => {
   // TODO 数据合并
 
   const translateNodeList = [];
 
-  list.forEach(item => {
-    const { level, start, end } = item;
-    let { text } = item;
-    const node = level.reduce((ast, path) => {
-      if (ast.isCustom) return ast;
-      return get(ast, path) || get(ast.children, path) || ast;
-    }, ast);
+  option.forEach((optionItem, index) => {
+    const { list } = optionItem;
+    if (!Array.isArray(list) || !list.length) return;
+    list.forEach(item => {
+      const { level, start, end } = item;
+      let { text } = item;
+      const node = level.reduce((ast, path) => {
+        if (ast.isCustom) return ast;
+        return get(ast, path) || get(ast.children, path) || ast;
+      }, ast);
 
-    let { type, content, attributes } = node;
+      let { type, content, attributes } = node;
 
-    // name: "data-custom-split"
+      // name: "data-custom-split"
 
-    // 字符转义后路径对应问题
+      // 字符转义后路径对应问题
 
-    if (
-      type === 'text' ||
-      (type === 'element' &&
-        attributes.find(item => item.name === 'data-custom-split'))
-    ) {
-      const parentNode = node.parent;
+      if (
+        type === 'text' ||
+        (type === 'element' &&
+          attributes.find(item => item.name === 'data-custom-split'))
+      ) {
+        const parentNode = node.parent;
 
-      if (!parentNode) return;
+        if (!parentNode) return;
 
-      let cNode = node;
-      if (!node.isCustom) {
-        cNode = {
-          attributes: [
-            {
-              name: 'data-custom-split',
-              value: 'true',
+        let cNode = node;
+        if (!node.isCustom) {
+          cNode = {
+            attributes: [
+              {
+                name: 'data-custom-split',
+                value: 'true',
+              },
+            ],
+            isCustom: true,
+            custom: {
+              list: [item],
+              node,
             },
-          ],
-          isCustom: true,
-          custom: {
-            list: [item],
-            node,
-          },
-          children: [],
-          parent: node.parent,
-          class: '_custom-underline',
-          tagName: 'span',
-          type: 'element',
-        };
+            children: [],
+            parent: node.parent,
+            class: '_custom-underline',
+            tagName: 'span',
+            type: 'element',
+          };
 
-        translateNodeList.push(cNode);
+          translateNodeList.push(cNode);
 
-        const index = parentNode.children.findIndex(item => item === node);
+          const index = parentNode.children.findIndex(item => item === node);
 
-        if (index !== -1) {
-          parentNode.children.splice(index, 1, cNode);
+          if (index !== -1) {
+            parentNode.children.splice(index, 1, cNode);
+          }
+        } else {
+          cNode.custom.list.push(item);
         }
-      } else {
-        cNode.custom.list.push(item);
       }
-    }
+    });
   });
 
   translateNodeList.forEach(item => {
@@ -115,7 +120,7 @@ const translateAstNodes = ({ ast, list = [] }) => {
         const { start, end, uuid } = d;
         list.push(
           { type: 'end', uuid, i: end },
-          { type: 'start', uuid, i: start },
+          { type: 'start', uuid, i: start }
         );
         return list;
       }, [])
@@ -145,9 +150,7 @@ const translateAstNodes = ({ ast, list = [] }) => {
 
 // 笔记与ast 的融和
 const getFormatAst = (ast, list) => {
-  // const ast = JSON.parse(JSON.stringify(this.ast))
   // TODO 将笔记插入到ast中
-
   translateAstNodes({ ast, list });
   return ast;
 };

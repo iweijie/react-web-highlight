@@ -1,4 +1,4 @@
-import { customAttr } from './constans';
+import { customAttr } from './constants';
 import getLevelList from './getLevelList';
 import getStartNode from './getStartNode';
 import getCustomSplitNodeInfo, {
@@ -7,10 +7,10 @@ import getCustomSplitNodeInfo, {
 
 interface ISelectedInfo {
   noteContainer: Element;
-  range: any;
+  range: Range;
 }
 
-interface ISelectedListItem {
+export interface INoteTextHighlightInfoItem {
   level: Number[];
   start: Number;
   end: Number;
@@ -27,7 +27,7 @@ const defaultCustomNodeInfo: ICustomSplitNodeInfo = {
 const getSelectedInfo = ({
   range,
   noteContainer,
-}: ISelectedInfo): ISelectedListItem[] => {
+}: ISelectedInfo): INoteTextHighlightInfoItem[] => {
   const {
     commonAncestorContainer,
     endContainer,
@@ -36,22 +36,24 @@ const getSelectedInfo = ({
     startOffset,
   } = range;
 
-  const outerContainer = getStartNode(commonAncestorContainer, noteContainer);
+  const outerContainer = getStartNode(
+    commonAncestorContainer as Element,
+    noteContainer
+  );
 
   const topLevel = getLevelList(outerContainer, noteContainer);
-
-  let node = getStartNode(startContainer, noteContainer);
+  // TODO 没太明白 Node  和  Element 的区别
+  let node = getStartNode(startContainer as Element, noteContainer);
 
   let isStart: Boolean = false;
   let isEnd: Boolean = false;
-  const list: ISelectedListItem[] = [];
+  const list: INoteTextHighlightInfoItem[] = [];
   let customNodeInfo: ICustomSplitNodeInfo = defaultCustomNodeInfo;
 
   outer: while (node && !isEnd) {
     // 所有分割文本上都多嵌套了一层 span ，添加自定义属性 data-custom-split
     // 文本节点木有获取属性
-    const isCustom =
-      node.getAttribute && node.getAttribute(customAttr);
+    const isCustom = node.getAttribute && node.getAttribute(customAttr);
 
     // TODO 需要判断当前是否为自定义分割节点，为分割节点的情况，需要到内部去判断当前是否为开始节点与结束节点
     if (isCustom) {

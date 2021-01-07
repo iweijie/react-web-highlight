@@ -10,23 +10,6 @@ const customAttr = {
   isSelfClosing: true,
 };
 
-{
-  /* <br>  插入一个简单的换行符，标签是空标签（意味着它没有结束标签，因此这是错误的：<br></br>）。
-
-<hr>  创建一条水平线，在HTML中，<hr> 没有结束标签。在XHTML中，<hr> 必须被正确地关闭，比如 <hr />。
-
-<img> 插入一幅图像，在HTML中，<img> 没有结束标签。在XHTML中，<img> 必须被正确地关闭，比如 <img />。
-
-<link>最常见的用途是链接样式表。在HTML中，<link> 没有结束标签。在XHTML中，<link> 必须被正确地关闭，比如 <link />
-
-<base> 页面上的所有链接规定默认地址或默认目标，在HTML中，<base> 没有结束标签。在XHTML中，<base> 必须被正确地关闭，比如 <base />。
-
-<area> 定义图像映射中的区域，在HTML中，<area> 没有结束标签。在XHTML中，<area> 必须正确地关闭，比如<area />。
-
-<input> 输入框，在HTML中，<input> 没有结束标签。在XHTML中，<input> 必须被正确地关闭，比如 <input />。
-
-<source> 标签为媒介元素（比如 <video> 和 <audio>）定义媒介资源。 */
-}
 const selfCloseTag = {
   input: true,
   img: true,

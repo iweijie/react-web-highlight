@@ -1,4 +1,4 @@
-import { customAttr } from './constans';
+import { customAttr } from './constants';
 
 /**
  * @description 如果外层有 customAttr 属性， 表示当前节点为自定义分割节点，取最近的一层, 如果没有就取当前节点
