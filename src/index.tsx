@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
+import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
 import getSelectedInfo, {
   INoteTextHighlightInfoItem,
 } from './utils/getSelectedInfo';
@@ -75,6 +76,7 @@ const Note = ({
           noteContainer: noteContainer.current,
         });
         setSelectText({
+          _isTemp: true,
           list,
           text: list.map(d => d.text).join(''),
           [rowKey]: getUUID(),
@@ -103,9 +105,16 @@ const Note = ({
     setSnapShoot({ __html: parse.getHTML(list) });
   }, [setSnapShoot, parse, value, selectText]);
 
+  useLayoutUpdateEffect(() => {
+    if(!noteContainer.current) return;
+    const nodes = noteContainer.current.querySelectorAll(`[${customAttr}]`)
+    console.log(nodes)
+
+  }, [snapShoot, noteContainer]);
+
   return (
     <div
-      onClick={handleClick}
+      onDoubleClick={handleClick}
       ref={noteContainer}
       onMouseDown={handleMouseDown}
       dangerouslySetInnerHTML={snapShoot}

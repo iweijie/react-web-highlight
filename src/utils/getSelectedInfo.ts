@@ -11,10 +11,10 @@ interface ISelectedInfo {
 }
 
 export interface INoteTextHighlightInfoItem {
-  level: Number[];
-  start: Number;
-  end: Number;
-  text: String;
+  level: number[];
+  start: number;
+  end: number;
+  text: string;
 }
 
 const defaultCustomNodeInfo: ICustomSplitNodeInfo = {
@@ -50,8 +50,8 @@ const getSelectedInfo = ({
   const list: INoteTextHighlightInfoItem[] = [];
   let customNodeInfo: ICustomSplitNodeInfo = defaultCustomNodeInfo;
 
-  outer: while (node && !isEnd) {
-    // 所有分割文本上都多嵌套了一层 span ，添加自定义属性 data-custom-split
+  outer: while (node && outerContainer.contains(node) && !isEnd) {
+    // 所有分割文本上都多嵌套了一层 span ，添加自定义属性 data-wj-custom-text
     // 文本节点木有获取属性
     const isCustom = node.getAttribute && node.getAttribute(customAttr);
 

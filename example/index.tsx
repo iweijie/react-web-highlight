@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import template from './htmlString';
 import Note from '../.';
+// import './index.css'
 
 const App = () => {
   const onChange = React.useCallback(list => {

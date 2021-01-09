@@ -22,7 +22,7 @@
   "peerDependencies": {
     "react": ">=16"
   },
-  "husky": {
+  "husky---production 再改回来": {
     "hooks": {
       "pre-commit": "tsdx lint"
     }
@@ -48,6 +48,7 @@
   ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.9.1",
+    "@types/lodash": "^4.14.167",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "husky": "^4.3.6",
@@ -60,6 +61,7 @@
     "uuid": "^8.3.2"
   },
   "dependencies": {
+    "htmlparser2": "^6.0.0",
     "lodash": "^4.17.20",
     "lodash-es": "^4.17.20"
   }

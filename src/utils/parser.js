@@ -31,8 +31,9 @@ function emit(token) {
       type: 'element',
       children: [],
       attributes: [],
+      tagName: token.tagName,
     };
-    element.tagName = token.tagName;
+    // element.tagName = token.tagName;
 
     for (let p in token) {
       if (p === 'id') {
@@ -80,6 +81,10 @@ function emit(token) {
   }
 }
 
+function isSpace(c) {
+  return c === '\u0000' || /^\s$/.test(c);
+}
+
 function data(c) {
   if (c === '<') {
     return tagOpen;
@@ -96,7 +101,7 @@ function data(c) {
     return data;
   }
 }
-
+// 开始标签
 function tagOpen(c) {
   // <!--这是一个注释，注释在浏览器中不会显示-->
   if (c === '!') {
@@ -109,11 +114,27 @@ function tagOpen(c) {
       tagName: '',
     };
     return tagName(c);
+  } else if (isSpace(c)) {
+    return tagOpen;
   } else {
-    return;
+    throw new Error('tagOpen error');
   }
 }
 
+// 结束标签
+function endTagOpen(c) {
+  if (c.match(/^[a-zA-Z0-9]$/)) {
+    currentToken = {
+      type: 'endTag',
+      tagName: '',
+    };
+    return tagName(c);
+  } else {
+    throw new Error('endTagOpen error');
+  }
+}
+
+// 注释开始节点
 function annotationStart(c) {
   if (c === '-') {
     annotationCount++;
@@ -124,10 +145,11 @@ function annotationStart(c) {
     }
     return annotationStart;
   } else {
-    throw new Error('html 格式错误');
+    throw new Error('annotationStart error');
   }
 }
 
+// 注释内容
 function annotationText(c) {
   if (c === '-') {
     annotationCount++;
@@ -137,13 +159,14 @@ function annotationText(c) {
   }
 }
 
+// 注释结束内容
 function annotationEnd(c) {
   if (annotationCount >= 2) {
     if (c === '>') {
       annotationCount = 0;
       return data;
     }
-    throw new Error('html 格式错误');
+    throw new Error('annotationEnd error');
   }
   if (c === '-') {
     annotationCount++;
@@ -154,9 +177,12 @@ function annotationEnd(c) {
   }
 }
 
+// 匹配标签名称
 function tagName(c) {
-  if (c.match(/^[\t\n\f ]$/)) {
-    return beforeAttributeName;
+  if (isSpace(c)) {
+    // 对应 标签前面有空格的情况，如：< p></p>
+    if (currentToken.tagName) return beforeAttributeName;
+    throw new Error('tagName error');
   } else if (c === '/') {
     return selfClosingStartTag;
   } else if (c.match(/^[a-zA-Z0-9]$/)) {
@@ -166,29 +192,18 @@ function tagName(c) {
     emit(currentToken);
     return data;
   } else {
-    return tagName;
-  }
-}
-
-function endTagOpen(c) {
-  if (c.match(/^[a-zA-Z]$/)) {
-    currentToken = {
-      type: 'endTag',
-      tagName: '',
-    };
-    return tagName(c);
-  } else if (c === '>') {
-  } else if (c === EOF) {
+    throw new Error('tagName error');
   }
 }
 
 function beforeAttributeName(c) {
-  if (c.match(/^[\t\n\f ]$/)) {
+  if (isSpace(c)) {
     return beforeAttributeName;
-  } else if (c === '/' || c === '>' || c === EOF) {
+  } else if (c === '/' || c === '>') {
     return afterAttributeName(c);
   } else if (c === '=') {
-    // return beforeAttributeName
+    // 对应无属性名的情况，如：<p ="wj"></p>, 直接丢弃
+    return lostAttribute;
   } else {
     currentAttribute = {
       name: '',
@@ -197,14 +212,28 @@ function beforeAttributeName(c) {
     return attributeName(c);
   }
 }
+// 对应 属性错误的方式，直接丢弃
+function lostAttribute(c) {
+  if (isSpace(c)) {
+    return beforeAttributeName;
+  } else if (c === '/' || c === '>') {
+    return afterAttributeName(c);
+  } else {
+    return lostAttribute;
+  }
+}
 
+// 设置 属性名称
 function attributeName(c) {
-  if (c.match(/^[\t\n\f ]$/) || c === '/' || c === '>' || c === EOF) {
+  if (isSpace(c) || c === '/' || c === '>') {
     return afterAttributeName(c);
   } else if (c === '=') {
     return beforeAttributeValue;
-  } else if (c === '\u0000') {
-  } else if (c === '"' || c === "'" || c === '<') {
+  } else if (c === '"' || c === "'") {
+    console.error('属性名称错误');
+    return lostAttribute;
+  } else if (c === '<') {
+    throw new Error('attributeName 属性解析错误');
   } else {
     currentAttribute.name += c;
     return attributeName;
@@ -212,13 +241,14 @@ function attributeName(c) {
 }
 
 function beforeAttributeValue(c) {
-  if (c.match(/^[\t\n\f ]$/) || c === '/' || c === '>' || c === EOF) {
+  if (isSpace(c)) {
     return beforeAttributeValue;
+  } else if (c === '/' || c === '>') {
+    return afterQuotedAttributeValue(c);
   } else if (c === '"') {
     return doubleQuotedAttributeValue;
   } else if (c === "'") {
     return singleQuotedAttributeValue;
-  } else if (c === '>') {
   } else {
     return unQuotedAttributeValue(c);
   }
@@ -228,8 +258,6 @@ function doubleQuotedAttributeValue(c) {
   if (c === '"') {
     currentToken[currentAttribute.name] = currentAttribute.value;
     return afterQuotedAttributeValue;
-  } else if (c === '\u0000') {
-  } else if (c === EOF) {
   } else {
     currentAttribute.value += c;
     return doubleQuotedAttributeValue;
@@ -240,8 +268,9 @@ function singleQuotedAttributeValue(c) {
   if (c === "'") {
     currentToken[currentAttribute.name] = currentAttribute.value;
     return afterQuotedAttributeValue;
-  } else if (c === '\u0000') {
-  } else if (c === EOF) {
+    // } else if (c === '\u0000') {
+    //   return singleQuotedAttributeValue;
+    // } else if (c === EOF) {
   } else {
     currentAttribute.value += c;
     return singleQuotedAttributeValue;
@@ -257,7 +286,7 @@ function afterQuotedAttributeValue(c) {
     currentToken[currentAttribute.name] = currentAttribute.value;
     emit(currentToken);
     return data;
-  } else if (c === EOF) {
+    // } else if (c === EOF) {
   } else {
     // 可以抛错 这里对应<div class="a"b>这种情况
     throw new Error('afterQuotedAttributeValue error');
@@ -280,7 +309,7 @@ function unQuotedAttributeValue(c) {
     return data;
   } else if (c === '\u0000') {
   } else if (c === '"' || c === "'" || c === '<' || c === '=' || c === '`') {
-  } else if (c === EOF) {
+    // } else if (c === EOF) {
   } else {
     currentAttribute.value += c;
     return unQuotedAttributeValue;
@@ -308,7 +337,6 @@ function afterAttributeName(c) {
     currentToken[currentAttribute.name] = currentAttribute.value;
     emit(currentToken);
     return data;
-  } else if (c === EOF) {
   } else {
     // 理论上这条分支是多余的，从beforeAttributeName或者attributeName状态进入时c已经确定了
     // currentToken[currentAttribute.name] = currentAttribute.value
@@ -326,7 +354,9 @@ export default function parserHTML(html) {
   for (let c of html) {
     state = state(c);
   }
+
   state = state(EOF);
+
   const children = stack[0].children;
 
   stack = [{ type: 'document', children: [] }];
