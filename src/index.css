@@ -1,0 +1,16 @@
+.note-wrap {
+    position: relative;
+}
+
+.note-tool-wrap {
+    position: absolute;
+    z-index: 10;
+    font-weight: 300;
+    height: 64px;
+    background: #484848;
+    color: #fff;
+    align-items: center;
+    justify-content: space-around;
+    display: flex;
+    border-radius: 8px;
+}

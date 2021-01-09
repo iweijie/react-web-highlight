@@ -1,10 +1,10 @@
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-// escape
-import { unescape, resolveIntersection } from './index';
+import { unescape, escape } from './tool';
+import resolveIntersection from './resolveIntersection';
 import { iAst, IAstItem, iAttr } from './parser';
-import { INoteTextHighlightInfo } from '../index';
-import { customAttr } from './constants';
+import { INoteTextHighlightInfo } from './index';
+import { setCustomValue, getCustomValue } from './customAttrValue';
 
 const endStr = '</span>';
 
@@ -41,27 +41,34 @@ const getLastAst = (astItem: IAstItem, path: number): IAstItem => {
 
 const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
   // TODO 数据合并
-
+  const {
+    tagName,
+    splitAttrName,
+    attrName,
+    selectedAttr,
+    rowKey,
+  } = getCustomValue();
   const translateNodeList: IAstItem[] = [];
 
   if (!options || isEmpty(options)) return;
 
   options.forEach((optionItem, index) => {
     const { list } = optionItem;
+    const uuid = optionItem[rowKey];
     if (!Array.isArray(list) || !list.length) return;
     list.forEach(item => {
       const { level, start, end } = item;
       // @ts-ignore
       const node: IAstItem = level.reduce(getLastAst, ast);
 
-      let { type, content, attributes } = node;
+      const { type, content, attributes } = node;
 
       // 字符转义后路径对应问题
 
       if (
         type === 'text' ||
         (type === 'element' &&
-          attributes.find((item: iAttr) => item.name === customAttr))
+          attributes.find((item: iAttr) => item.name === attrName))
       ) {
         const parentNode = node.parent;
 
@@ -72,18 +79,19 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
           cNode = {
             attributes: [
               {
-                name: customAttr,
+                name: attrName,
                 value: 'true',
               },
             ],
             isCustom: true,
             custom: {
+              uuid,
               list: [item],
               node,
             },
             children: [],
             parent: node.parent,
-            tagName: 'span',
+            tagName,
             type: 'element',
           };
 
@@ -100,22 +108,21 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
       }
     });
   });
-
   translateNodeList.forEach(item => {
-    const { list, node } = item.custom;
+    const { list, node, uuid } = item.custom;
     const content = unescape(node.content);
     const intersection = list.reduce((list: any[], d: any) => {
-      const { start, end, text, id } = d;
+      const { start, end, text } = d;
       const comparisonText = content.slice(start, end);
       if (comparisonText !== text) return list;
-      list.push({ id, start, end });
+      list.push({ uuid, start, end });
       return list;
     }, []);
 
     const newContext = resolveIntersection(intersection, content)
       .reduce((list, d) => {
-        const { start, end, id } = d;
-        list.push({ type: 'end', id, i: end }, { type: 'start', id, i: start });
+        const { start, end, uuid } = d;
+        list.push({ type: 'end', uuid, i: end }, { type: 'start', uuid, i: start });
         return list;
       }, [])
       .sort((a: any, b: any) => {
@@ -127,11 +134,11 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
         return b.i - a.i;
       })
       .reduce((text: string, item: any) => {
-        const { type, i, id } = item;
-        console.log(item)
+        const { type, i, uuid } = item;
+        console.log(item);
         const insertStr =
           type === 'start'
-            ? `<span data-wj-custom-split="true" data-custom-id="${id}">`
+            ? `<span ${splitAttrName}="true" ${selectedAttr}="${uuid}">`
             : endStr;
         return `${text.slice(0, i)}${insertStr}${text.slice(i)}`;
       }, content);

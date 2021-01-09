@@ -5,7 +5,7 @@ import {
   customTag as tagName,
   customSplitAttr,
 } from '../constants';
-import { INoteTextHighlightInfo } from '../../index';
+import { INoteTextHighlightInfo } from '../index';
 
 interface IParseProps {
   template: string;

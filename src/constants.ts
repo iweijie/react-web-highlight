@@ -4,3 +4,11 @@ export const customAttr = 'data-wj-custom-text';
 export const customTag = 'span';
 
 export const customSplitAttr = 'data-wj-custom-split';
+
+export const customRowKey = 'id';
+
+export const customSelectedAttr = 'data-wj-custom-id';
+
+export const defaultStyles = {
+  position: 'relative',
+};

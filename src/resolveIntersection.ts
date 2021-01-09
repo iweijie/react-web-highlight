@@ -1,21 +1,7 @@
-// 将HTML转义为实体
-export function escape(html: string): string {
-  var elem = document.createElement('div');
-  var txt = document.createTextNode(html);
-  elem.appendChild(txt);
-  return elem.innerHTML;
-}
-// 将实体转回为HTML
-export function unescape(str: string): string {
-  var elem = document.createElement('div');
-  elem.innerHTML = str;
-  return elem.innerText || elem.textContent || '';
-}
-
 // 获取交集
 // TODO 后续有性能问题再优化
-export const resolveIntersection = function(list: any, content: string) {
-    console.log("-----------",list)
+const resolveIntersection = function(list: any, content: string) {
+  console.log('-----------', list);
   if (!list || !list.length) return [];
   let joinList: any[] = [];
   let startOffset = 0;
@@ -64,3 +50,5 @@ export const resolveIntersection = function(list: any, content: string) {
   }
   return intersection;
 };
+
+export default resolveIntersection;

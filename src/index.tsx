@@ -1,14 +1,20 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
 import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
-import getSelectedInfo, {
-  INoteTextHighlightInfoItem,
-} from './utils/getSelectedInfo';
-import { customTag as cTag, customAttr as cAttr } from './utils/constants';
-import getUUID from './utils/getUUID';
+import getSelectedInfo, { INoteTextHighlightInfoItem } from './getSelectedInfo';
+import {
+  customTag as cTag,
+  customAttr as cAttr,
+  customRowKey,
+  customSplitAttr,
+  customSelectedAttr,
+  defaultStyles,
+} from './constants';
+import { setCustomValue, getCustomValue } from './customAttrValue';
+import { getUUID, getElementLeft, getElementTop } from './tool';
 
-import Parse from './utils/Parse/index';
-// import styles from './index.less';
+import Parse from './Parse/index';
+import './index.css';
 
 export interface INoteTextHighlightInfo {
   list: INoteTextHighlightInfoItem[];
@@ -19,8 +25,9 @@ export interface INoteTextHighlightInfo {
 export interface INote {
   template: string;
   value?: INoteTextHighlightInfo[];
-  customTag?: string;
-  customAttr?: string;
+  tagName?: string;
+  attrName?: string;
+  splitAttrName?: string;
   onChange: (a: any) => void;
   rowKey?: string;
 }
@@ -28,9 +35,10 @@ export interface INote {
 const Note = ({
   template,
   value,
-  customTag = cTag,
-  customAttr = cAttr,
-  rowKey = 'id',
+  // splitAttrName = customSplitAttr,
+  tagName = cTag,
+  attrName = cAttr,
+  rowKey = customRowKey,
   onChange,
 }: INote) => {
   const [selectText, setSelectText] = useState<INoteTextHighlightInfo | null>(
@@ -45,7 +53,7 @@ const Note = ({
       template = div.innerHTML;
     }
 
-    return new Parse({ template: template || '', customAttr, customTag });
+    return new Parse({ template: template || '' });
   }, []);
 
   const [snapShoot, setSnapShoot] = useState(() => {
@@ -61,6 +69,14 @@ const Note = ({
         const range: Range | undefined = window?.getSelection()?.getRangeAt(0);
 
         const { collapsed = true, endContainer, startContainer } = range || {};
+
+        setCustomValue({
+          tagName,
+          attrName,
+          rowKey,
+          splitAttrName: customSplitAttr,
+          selectedAttr: customSelectedAttr,
+        });
 
         // 返回条件 1. 光标起始点相同（即没有选中文本），2. 起点或者终点不在当前容器内
         if (
@@ -102,23 +118,43 @@ const Note = ({
       });
       list.push(...value);
     }
+    console.log('list', list);
     setSnapShoot({ __html: parse.getHTML(list) });
   }, [setSnapShoot, parse, value, selectText]);
 
   useLayoutUpdateEffect(() => {
-    if(!noteContainer.current) return;
-    const nodes = noteContainer.current.querySelectorAll(`[${customAttr}]`)
-    console.log(nodes)
-
+    if (!noteContainer.current) return;
+    const nodes = noteContainer.current.querySelectorAll(
+      `[${customSelectedAttr}="${selectText?.id}"]`
+    );
+    console.log(nodes);
+    const positionList: number[][] = [];
+    for (let i = 0; i < nodes.length; i++) {
+      const left = getElementLeft(nodes[i], noteContainer.current);
+      const top = getElementTop(nodes[i], noteContainer.current);
+      positionList.push([top, left]);
+    }
+    console.log(positionList);
   }, [snapShoot, noteContainer]);
 
   return (
-    <div
-      onDoubleClick={handleClick}
-      ref={noteContainer}
-      onMouseDown={handleMouseDown}
-      dangerouslySetInnerHTML={snapShoot}
-    />
+    <div>
+      <div
+        className="note-wrap"
+        onDoubleClick={handleClick}
+        ref={noteContainer}
+        onMouseDown={handleMouseDown}
+        dangerouslySetInnerHTML={snapShoot}
+      />
+      <div className="note-tool-wrap">
+        <ul className="note-tool">
+          <li>笔记</li>
+          <li>划线</li>
+          <li>复制</li>
+          <li>取消</li>
+        </ul>
+      </div>
+    </div>
   );
 };
 
