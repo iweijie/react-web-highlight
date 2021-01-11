@@ -8,12 +8,12 @@ import {
   customRowKey,
   customSplitAttr,
   customSelectedAttr,
-  defaultStyles,
 } from './constants';
 import { setCustomValue, getCustomValue } from './customAttrValue';
 import { getUUID, getElementLeft, getElementTop } from './tool';
 
 import Parse from './Parse/index';
+import './asset/font/iconfont.css';
 import './index.css';
 
 export interface INoteTextHighlightInfo {
@@ -52,14 +52,16 @@ const Note = ({
       div.innerHTML = template;
       template = div.innerHTML;
     }
-
-    return new Parse({ template: template || '' });
+    return new Parse({ template });
   }, []);
 
   const [snapShoot, setSnapShoot] = useState(() => {
     return { __html: parse.getHTML(value) };
   });
+
   const noteContainer = useRef<HTMLDivElement>(null);
+  const toolContainer = useRef<HTMLUListElement>(null);
+  const toolWrapContainer = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = useCallback(() => {
     if (!noteContainer.current) return;
@@ -108,6 +110,18 @@ const Note = ({
     onChange(selectText);
   }, [onChange, selectText]);
 
+  const handleToggleTool = useCallback(() => {
+    if (!toolWrapContainer.current) return;
+    const display =
+      toolWrapContainer.current.style.display === 'block' ? 'none' : 'block';
+    toolWrapContainer.current.style.display = display;
+    if (display === 'none') {
+      const { height } =
+        toolWrapContainer.current.parentElement?.getBoundingClientRect() || {};
+      toolWrapContainer.current.style.height = height ? `${height}px` : '100%';
+    }
+  }, [toolWrapContainer]);
+
   useUpdateEffect(() => {
     const list = selectText ? [selectText] : [];
     if (value) {
@@ -118,23 +132,25 @@ const Note = ({
       });
       list.push(...value);
     }
-    console.log('list', list);
     setSnapShoot({ __html: parse.getHTML(list) });
   }, [setSnapShoot, parse, value, selectText]);
 
   useLayoutUpdateEffect(() => {
-    if (!noteContainer.current) return;
+    if (!noteContainer.current || !toolContainer.current) return;
     const nodes = noteContainer.current.querySelectorAll(
       `[${customSelectedAttr}="${selectText?.id}"]`
     );
+
+    if (nodes.length < 1) return;
     console.log(nodes);
-    const positionList: number[][] = [];
+    handleToggleTool();
+    const { width, height } = toolContainer.current.getBoundingClientRect();
+
+    const positionList: DOMRect[] = [];
     for (let i = 0; i < nodes.length; i++) {
-      const left = getElementLeft(nodes[i], noteContainer.current);
-      const top = getElementTop(nodes[i], noteContainer.current);
-      positionList.push([top, left]);
+      positionList.push(nodes[i].getBoundingClientRect());
     }
-    console.log(positionList);
+    const { left, right, top } = positionList[0];
   }, [snapShoot, noteContainer]);
 
   return (
@@ -146,12 +162,28 @@ const Note = ({
         onMouseDown={handleMouseDown}
         dangerouslySetInnerHTML={snapShoot}
       />
-      <div className="note-tool-wrap">
-        <ul className="note-tool">
-          <li>笔记</li>
-          <li>划线</li>
-          <li>复制</li>
-          <li>取消</li>
+      <div
+        className="note-tool-wrap"
+        ref={toolWrapContainer}
+        onClick={handleToggleTool}
+      >
+        <ul className="note-tool down" ref={toolContainer}>
+          <li>
+            <span className="iconfont icon-huaxian"></span>
+            <i>划线</i>
+          </li>
+          <li>
+            <span className="iconfont icon-edit"></span>
+            <i>笔记</i>
+          </li>
+          <li>
+            <span className="iconfont icon-fuzhi"></span>
+            <i>复制</i>
+          </li>
+          <li>
+            <span className="iconfont icon-quxiao"></span>
+            <i>取消</i>
+          </li>
         </ul>
       </div>
     </div>
