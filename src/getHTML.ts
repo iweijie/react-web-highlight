@@ -4,9 +4,20 @@ import { unescape, escape } from './tool';
 import resolveIntersection from './resolveIntersection';
 import { iAst, IAstItem, iAttr } from './parser';
 import { INoteTextHighlightInfo } from './index';
-import { setCustomValue, getCustomValue } from './customAttrValue';
+import { getCustomValue } from './customAttrValue';
 
-const endStr = '</span>';
+export interface IType {
+  type: 'start' | 'end';
+  uuid: string | number;
+  i: number;
+}
+
+export interface ICustomData {
+  uuid: string | number;
+  start: number;
+  end: number;
+  [x: string]: any;
+}
 
 const getElementHTML = (item: IAstItem) => {
   if (item.type === 'element') {
@@ -48,6 +59,9 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
     selectedAttr,
     rowKey,
   } = getCustomValue();
+
+  const endStr = `</${tagName}>`;
+
   const translateNodeList: IAstItem[] = [];
 
   if (!options || isEmpty(options)) return;
@@ -57,13 +71,10 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
     const uuid = optionItem[rowKey];
     if (!Array.isArray(list) || !list.length) return;
     list.forEach(item => {
-      const { level, start, end } = item;
       // @ts-ignore
-      const node: IAstItem = level.reduce(getLastAst, ast);
+      const node: IAstItem = item.level.reduce(getLastAst, ast);
 
       const { type, content, attributes } = node;
-
-      // 字符转义后路径对应问题
 
       if (
         type === 'text' ||
@@ -110,38 +121,35 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
   });
   translateNodeList.forEach(item => {
     const { list, node, uuid } = item.custom;
+    // 解决字符转义后路径对应问题
     const content = unescape(node.content);
-    const intersection = list.reduce((list: any[], d: any) => {
-      const { start, end, text } = d;
-      const comparisonText = content.slice(start, end);
-      if (comparisonText !== text) return list;
-      list.push({ uuid, start, end });
-      return list;
-    }, []);
-
-    const newContext = resolveIntersection(intersection, content)
-      .reduce((list, d) => {
-        const { start, end, uuid } = d;
-        list.push({ type: 'end', uuid, i: end }, { type: 'start', uuid, i: start });
-        return list;
-      }, [])
-      .sort((a: any, b: any) => {
-        if (b.i === a.i) {
-          if (b.type === a.type) return 0;
-          if (b.type === 'start') return 1;
-          if (a.type === 'start') return -1;
-        }
-        return b.i - a.i;
+    // 过滤不匹配文本
+    const filterData = list
+      .filter((item: ICustomData) => {
+        const { start, end, text } = item;
+        const comparisonText = content.slice(start, end);
+        return comparisonText === text;
       })
-      .reduce((text: string, item: any) => {
-        const { type, i, uuid } = item;
+      .map((item: any) => {
+        item.uuid = uuid;
+        return item;
+      });
+
+    const newContext = resolveIntersection(filterData, content)
+      .map(item => {
+        const { start, end, text, uuids } = item;
+        // 用于解决文本转标签注入的问题
+        const content = escape(text);
         console.log(item);
-        const insertStr =
-          type === 'start'
-            ? `<span ${splitAttrName}="true" ${selectedAttr}="${uuid}">`
-            : endStr;
-        return `${text.slice(0, i)}${insertStr}${text.slice(i)}`;
-      }, content);
+        const header = uuids.map(uuid => {
+          return `<${tagName} ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
+        });
+        const footer = uuids.map(uuid => {
+          return endStr;
+        });
+        return [...header, content, ...footer].filter(Boolean).join('');
+      })
+      .join('');
 
     item.children.push({
       content: newContext,

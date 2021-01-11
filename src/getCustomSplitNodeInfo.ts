@@ -12,7 +12,7 @@ export interface ICustomSplitNodeInfo {
 }
 
 /**
- * @description 分割节点作为一个整体判断
+ * @description 分割文本节点作为一个整体判断
  */
 const getCustomSplitNodeInfo = ({
   node,

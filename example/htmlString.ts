@@ -1,4 +1,14 @@
-const a =  `<p>你好，我是winter，今天我们继续来看浏览器的相关内容。</p><p>我在上一篇文章中，简要介绍了浏览器的工作大致可以分为6个阶段，我们昨天讲完了第一个阶段，也就是通讯的部分：浏览器使用HTTP协议或者HTTPS协议，向服务端请求页面的过程。</p><p>今天我们主要来看两个过程：如何解析请求回来的HTML代码，DOM树又是如何构建的。<br>
+const a = `</p><pre><code>&lt;html maaa=a &gt;
+&lt;head&gt;
+    &lt;title&gt;cool&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;img src=&quot;a&quot; /&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>`
+
+const b=  `<p>你好，我是winter，今天我们继续来看浏览器的相关内容。</p><p>我在上一篇文章中，简要介绍了浏览器的工作大致可以分为6个阶段，我们昨天讲完了第一个阶段，也就是通讯的部分：浏览器使用HTTP协议或者HTTPS协议，向服务端请求页面的过程。</p><p>今天我们主要来看两个过程：如何解析请求回来的HTML代码，DOM树又是如何构建的。<br>
 <img src="https://static001.geekbang.org/resource/image/34/5a/34231687752c11173b7776ba5f4a0e5a.png" alt=""></p><h2>解析代码</h2><p>我们在前面讲到了HTTP的构成，但是我们有一部分没有详细讲解，那就是Response的body部分，这正是因为HTTP的Response的body，就要交给我们今天学习的内容去处理了。</p><p>HTML的结构不算太复杂，我们日常开发需要的90%的“词”（指编译原理的术语token，表示最小的有意义的单元），种类大约只有标签开始、属性、标签结束、注释、CDATA节点几种。</p><p>实际上有点麻烦的是，由于HTML跟SGML的千丝万缕的联系，我们需要做不少容错处理。“&lt;?”和“&lt;%”什么的也是必须要支持好的，报了错也不能吭声。</p><h3>1.词（token）是如何被拆分的</h3><p>首先我们来看看一个非常标准的标签，会被如何拆分：</p><pre><code>&lt;p class=&quot;a&quot;&gt;text text text&lt;/p&gt;
 </code></pre><p>如果我们从最小有意义单元的定义来拆分，第一个词（token）是什么呢？显然，作为一个词（token），整个p标签肯定是过大了（它甚至可以嵌套）。</p><!-- [[[read_end]]] --><p>那么，只用p标签的开头是不是合适吗？我们考虑到起始标签也是会包含属性的，最小的意义单元其实是“&lt;p” ，所以“ &lt;p” 就是我们的第一个词（token）。</p><p>我们继续拆分，可以把这段代码依次拆成词（token）：</p><ul>
 <li>&lt;p“标签开始”的开始；</li>

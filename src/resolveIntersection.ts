@@ -1,31 +1,41 @@
-// 获取交集
+import { ICustomData } from './getHTML';
+
+/**
+ * 获取交集
+ * @param list [{uuid, start, end}]
+ * @param content 文本
+ */
+
+interface iIntersection {
+  end: number;
+  start: number;
+  text: string;
+  uuids: any[];
+}
+
 // TODO 后续有性能问题再优化
-const resolveIntersection = function(list: any, content: string) {
-  console.log('-----------', list);
-  if (!list || !list.length) return [];
-  let joinList: any[] = [];
+
+const resolveIntersection = function(
+  list: ICustomData[],
+  content: string
+): iIntersection[] {
+  const joinList: any[] = [];
   let startOffset = 0;
-  const intersection: any[] = [];
+  const textContentList = [];
   for (let i = 0; i <= content.length; i++) {
-    list.forEach((e: any) => {
+    list.forEach(e => {
       const { start, end, uuid } = e;
       if (start === i) {
-        if (!joinList.length) {
-          startOffset = start;
-          joinList.push(uuid);
-        } else {
-          if (startOffset < i) {
-            joinList.forEach(id => {
-              intersection.push({
-                uuid: id,
-                start: startOffset,
-                end: i,
-              });
-            });
-          }
-          startOffset = i;
-          joinList.push(uuid);
+        if (startOffset < i) {
+          textContentList.push({
+            start: startOffset,
+            end: i,
+            text: content.slice(startOffset, i),
+            uuids: [...joinList],
+          });
         }
+        startOffset = i;
+        joinList.push(uuid);
       } else if (end === i) {
         const index = joinList.findIndex(item => item === uuid);
 
@@ -34,21 +44,30 @@ const resolveIntersection = function(list: any, content: string) {
         }
 
         if (startOffset < i) {
-          joinList.forEach(id => {
-            intersection.push({
-              uuid: id,
-              start: startOffset,
-              end: i,
-            });
+          textContentList.push({
+            start: startOffset,
+            end: i,
+            text: content.slice(startOffset, i),
+            uuids: [...joinList],
           });
         }
-        startOffset = i;
 
+        startOffset = i;
         joinList.splice(index, 1);
       }
     });
   }
-  return intersection;
+
+  if (startOffset !== content.length) {
+    textContentList.push({
+      start: startOffset,
+      end: content.length,
+      text: content.slice(startOffset, content.length),
+      uuids: [...joinList],
+    });
+  }
+
+  return textContentList;
 };
 
 export default resolveIntersection;
