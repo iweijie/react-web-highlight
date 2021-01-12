@@ -1,19 +1,19 @@
 import React from 'react';
 import { getUUID } from './tool';
 
-export const cancel = getUUID();
+export const cancelType = getUUID();
 
-export const copy = getUUID();
+export const copyType = getUUID();
 
 export default [
   {
     icon: <span className="iconfont icon-fuzhi" />,
     name: '复制',
-    type: copy,
+    type: copyType,
   },
   {
     icon: <span className="iconfont icon-quxiao" />,
     name: '取消',
-    type: cancel,
+    type: cancelType,
   },
 ];

@@ -1,71 +1,70 @@
 {
-  "version": "0.1.0",
-  "license": "MIT",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "src"
-  ],
-  "engines": {
-    "node": ">=10"
-  },
-  "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "test": "tsdx test --passWithNoTests",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
-    "size": "size-limit",
-    "analyze": "size-limit --why"
-  },
-  "peerDependencies": {
-    "react": ">=16"
-  },
-  "husky---production 再改回来": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
-  },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
-  "name": "web-text",
-  "author": "iweijie",
-  "module": "dist/web-text.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/web-text.cjs.production.min.js",
-      "limit": "10 KB"
+    "version": "0.0.1",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "src"
+    ],
+    "engines": {
+        "node": ">=10"
     },
-    {
-      "path": "dist/web-text.esm.js",
-      "limit": "10 KB"
+    "scripts": {
+        "start": "tsdx watch",
+        "build": "tsdx build",
+        "test": "tsdx test --passWithNoTests",
+        "lint": "tsdx lint",
+        "prepare": "tsdx build",
+        "size": "size-limit",
+        "analyze": "size-limit --why"
+    },
+    "peerDependencies": {
+        "react": ">=16"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "tsdx lint"
+        }
+    },
+    "prettier": {
+        "printWidth": 80,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "es5"
+    },
+    "name": "react-text-highlight",
+    "author": "iweijie",
+    "module": "dist/web-text.esm.js",
+    "size-limit": [{
+            "path": "dist/web-text.cjs.production.min.js",
+            "limit": "10 KB"
+        },
+        {
+            "path": "dist/web-text.esm.js",
+            "limit": "10 KB"
+        }
+    ],
+    "devDependencies": {
+        "@size-limit/preset-small-lib": "^4.9.1",
+        "@types/lodash": "^4.14.167",
+        "@types/react": "^17.0.0",
+        "@types/react-dom": "^17.0.0",
+        "autoprefixer": "^10.2.1",
+        "cssnano": "^4.1.10",
+        "husky": "^4.3.6",
+        "react": "^17.0.1",
+        "react-dom": "^17.0.1",
+        "rollup-plugin-postcss": "^4.0.0",
+        "size-limit": "^4.9.1",
+        "tsdx": "^0.14.1",
+        "tslib": "^2.1.0",
+        "typescript": "^4.1.3",
+        "uuid": "^8.3.2"
+    },
+    "dependencies": {
+        "htmlparser2": "^6.0.0",
+        "lodash": "^4.17.20",
+        "lodash-es": "^4.17.20"
     }
-  ],
-  "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.9.1",
-    "@types/lodash": "^4.14.167",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "autoprefixer": "^10.2.1",
-    "cssnano": "^4.1.10",
-    "husky": "^4.3.6",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "rollup-plugin-postcss": "^4.0.0",
-    "size-limit": "^4.9.1",
-    "tsdx": "^0.14.1",
-    "tslib": "^2.1.0",
-    "typescript": "^4.1.3",
-    "uuid": "^8.3.2"
-  },
-  "dependencies": {
-    "htmlparser2": "^6.0.0",
-    "lodash": "^4.17.20",
-    "lodash-es": "^4.17.20"
-  }
 }

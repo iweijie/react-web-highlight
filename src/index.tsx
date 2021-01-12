@@ -17,9 +17,21 @@ import {
   customSelectedAttr,
   marginVertical,
 } from './constants';
+import defaultToolBarListValue, {
+  copyType,
+  cancelType,
+} from './defaultToolBarList';
 import { setCustomValue, getCustomValue } from './customAttrValue';
-import { getUUID, getElementLeft, getElementTop } from './tool';
+import {
+  getUUID,
+  copyToShearPlate,
+  getElementLeft,
+  getElementTop,
+} from './tool';
 import map from 'lodash/map';
+import filter from 'lodash/filter';
+import isEmpty from 'lodash/isEmpty';
+
 import Parse from './Parse/index';
 import './asset/font/iconfont.css';
 import './index.css';
@@ -40,7 +52,7 @@ export interface INoteTextHighlightInfo {
 }
 
 interface IOnChangeProps {
-  action: string;
+  action: 'add' | 'update';
   data: {
     list: INoteTextHighlightInfoItem[];
     text: string;
@@ -59,6 +71,8 @@ export interface INote {
   rowKey?: string;
   toolBarList?: IToolBarPaneProps[];
   renderToolBar?: (a: any) => ReactNode;
+  filterToolBar?: (option: IToolBarPaneProps) => boolean;
+  hasDefaultToolBar?: boolean;
 }
 // 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
 let rangeRect: DOMRect;
@@ -67,13 +81,14 @@ const defaultToolBarList: IToolBarPaneProps[] = [];
 const Note = ({
   template,
   value,
-  // splitAttrName = customSplitAttr,
   tagName = cTag,
   attrName = cAttr,
   rowKey = customRowKey,
   toolBarList = defaultToolBarList,
   onChange,
   renderToolBar,
+  filterToolBar,
+  hasDefaultToolBar,
 }: INote) => {
   const [selectText, setSelectText] = useState<INoteTextHighlightInfo | null>(
     null
@@ -88,6 +103,16 @@ const Note = ({
     }
     return new Parse({ template });
   }, []);
+
+  const getToolBarList = useCallback(() => {
+    let list: IToolBarPaneProps[] = toolBarList;
+    if (filterToolBar) {
+      list = filter(toolBarList, filterToolBar);
+    }
+    return hasDefaultToolBar || hasDefaultToolBar === undefined
+      ? [...list, ...defaultToolBarListValue]
+      : list;
+  }, [hasDefaultToolBar, toolBarList, filterToolBar, defaultToolBarListValue]);
 
   const [snapShoot, setSnapShoot] = useState(() => {
     return { __html: parse.getHTML(value) };
@@ -106,55 +131,81 @@ const Note = ({
   const toolContainer = useRef<HTMLUListElement>(null);
   const toolWrapContainer = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = useCallback(() => {
-    if (!noteContainer.current) return;
-    document.addEventListener(
-      'mouseup',
-      () => {
-        const range: Range | undefined = window?.getSelection()?.getRangeAt(0);
-        if (!range) return;
-        const { collapsed = true, endContainer, startContainer } = range;
-        rangeRect = range.getBoundingClientRect();
+  const handleSelectedText = useCallback(() => {
+    const range: Range | undefined = window?.getSelection()?.getRangeAt(0);
+    if (!range) return;
+    // debugger
+    const { collapsed = true, endContainer, startContainer } = range;
+    rangeRect = range.getBoundingClientRect();
 
-        const modeClassNames: any = {};
-        toolBarList.forEach(item => {
-          modeClassNames[item.type] = item.className || '';
-        });
+    const modeClassNames: any = {};
+    toolBarList.forEach(item => {
+      modeClassNames[item.type] = item.className || '';
+    });
 
-        setCustomValue({
-          tagName,
-          attrName,
-          rowKey,
-          splitAttrName: customSplitAttr,
-          selectedAttr: customSelectedAttr,
-          modeClassNames,
-        });
+    setCustomValue({
+      tagName,
+      attrName,
+      rowKey,
+      splitAttrName: customSplitAttr,
+      selectedAttr: customSelectedAttr,
+      modeClassNames,
+    });
 
-        // 返回条件 1. 光标起始点相同（即没有选中文本），2. 起点或者终点不在当前容器内
-        if (
-          collapsed ||
-          !noteContainer.current ||
-          !noteContainer.current.contains(startContainer as Node) ||
-          !noteContainer.current.contains(endContainer as Node)
-        )
-          return;
+    // 返回条件 1. 光标起始点相同（即没有选中文本），2. 起点或者终点不在当前容器内
+    if (
+      collapsed ||
+      !noteContainer.current ||
+      !noteContainer.current.contains(startContainer as Node) ||
+      !noteContainer.current.contains(endContainer as Node)
+    )
+      return;
 
-        const list = getSelectedInfo({
-          range: range as Range,
-          noteContainer: noteContainer.current,
-        });
-        setSelectText({
-          _isTemp: true,
-          list,
-          text: map(list, d => d.text).join(''),
-          [rowKey]: getUUID(),
-        });
-      },
-      {
-        once: true,
-      }
-    );
-  }, [noteContainer, toolBarList, parse]);
+    const list = getSelectedInfo({
+      range: range as Range,
+      noteContainer: noteContainer.current,
+    });
+    setSelectText({
+      _isTemp: true,
+      list,
+      text: map(list, d => d.text).join(''),
+      [rowKey]: getUUID(),
+    });
+  }, [noteContainer, toolBarList, parse, setSelectText]);
+
+  const handleMouseDown = useCallback(
+    eventDown => {
+      if (!noteContainer.current) return;
+      document.addEventListener(
+        'mouseup',
+        eventUp => {
+          handleSelectedText();
+        },
+        {
+          once: true,
+        }
+      );
+    },
+    [noteContainer, toolBarList, parse]
+  );
+  // TODO 移动端
+  // const handleTouchstart = useCallback(
+  //   eventDown => {
+  //     if (!noteContainer.current) return;
+  //     document.addEventListener(
+  //       'touchend',
+  //       eventUp => {
+  //         console.log(eventDown);
+  //         console.log(eventUp);
+  //         handleSelectedText();
+  //       },
+  //       {
+  //         once: true,
+  //       }
+  //     );
+  //   },
+  //   [noteContainer, toolBarList, parse]
+  // );
 
   const handleToggleTool = useCallback(
     visible => {
@@ -178,15 +229,29 @@ const Note = ({
   );
 
   const handleCancelTool = useCallback(() => {
+    // debugger
     handleToggleTool(false);
     setSelectText(null);
   }, [handleToggleTool, setSelectText]);
 
+  // TODO 感觉异步的体验感不太好， 后续修改
+
   const handleToolBarClick = useCallback(
     mode => {
-      if (!selectText?.text) return;
-
+      if (!selectText) return;
       const { list, text, _isTemp } = selectText;
+
+      // 默认取消
+      if (mode === cancelType) {
+        handleCancelTool();
+        return;
+      }
+
+      if (mode === copyType) {
+        copyToShearPlate(text);
+        handleCancelTool();
+        return;
+      }
 
       if (onChange && typeof onChange === 'function') {
         const data: IOnChangeProps['data'] = { list, text };
@@ -206,31 +271,26 @@ const Note = ({
             handleCancelTool();
           }
         });
+        return;
       }
+      handleCancelTool();
     },
     [toolBarList, rowKey, selectText]
   );
 
   useUpdateEffect(() => {
-    const list = selectText ? [selectText] : [];
     if (value) {
       value = map(value, item => {
         if (!item || item[rowKey]) return item;
         item[rowKey] = getUUID();
         return item;
       });
-      list.push(...value);
     }
-    setSnapShoot({ __html: parse.getHTML(list) });
-  }, [setSnapShoot, parse, value, selectText]);
+    setSnapShoot({ __html: parse.getHTML(value) });
+  }, [setSnapShoot, parse, value]);
 
   useLayoutUpdateEffect(() => {
-    if (!wrapContainer.current || !toolContainer.current) return;
-    const nodes = wrapContainer.current.querySelectorAll(
-      `[${customSelectedAttr}="${selectText?.id}"]`
-    );
-
-    if (nodes.length < 1) return;
+    if (!wrapContainer.current || !toolContainer.current || !selectText) return;
     handleToggleTool(true);
     const wrapContainerRect = wrapContainer.current.getBoundingClientRect();
     const toolContainerRect = toolContainer.current.getBoundingClientRect();
@@ -280,16 +340,15 @@ const Note = ({
       },
       className,
     });
-    console.log('rangeRect', rangeRect);
-  }, [snapShoot, wrapContainer]);
+  }, [selectText, wrapContainer, toolContainer]);
 
   return (
     <div className="note-wrap" ref={wrapContainer}>
       <div
         className="note"
-        // onDoubleClick={handleClick}
         ref={noteContainer}
         onMouseDown={handleMouseDown}
+        // onTouchStart={handleTouchstart}
         dangerouslySetInnerHTML={snapShoot}
       />
       <div className="note-tool-wrap" ref={toolWrapContainer}>
@@ -298,7 +357,7 @@ const Note = ({
           ref={toolContainer}
           style={toolInfo.style}
         >
-          {map(toolBarList, item => {
+          {map(getToolBarList(), item => {
             return (
               <li key={item.type} onClick={() => handleToolBarClick(item.type)}>
                 {item.icon}
