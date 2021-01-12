@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useRef, ReactNode } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  ReactNode,
+} from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
 import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
 import useSetState from './hooks/useSetState';
@@ -9,7 +15,7 @@ import {
   customRowKey,
   customSplitAttr,
   customSelectedAttr,
-  marginVertical
+  marginVertical,
 } from './constants';
 import { setCustomValue, getCustomValue } from './customAttrValue';
 import { getUUID, getElementLeft, getElementTop } from './tool';
@@ -20,7 +26,7 @@ import './index.css';
 
 interface IToolBarPaneProps {
   name: string;
-  mode: string;
+  type: string;
   className?: string;
   icon?: ReactNode;
   render?: (props: any) => ReactNode;
@@ -29,18 +35,18 @@ interface IToolBarPaneProps {
 export interface INoteTextHighlightInfo {
   list: INoteTextHighlightInfoItem[];
   text: string;
-  mode?: string,
+  mode?: string;
   [x: string]: any;
 }
 
 interface IOnChangeProps {
   action: string;
   data: {
-    list: INoteTextHighlightInfoItem[],
+    list: INoteTextHighlightInfoItem[];
     text: string;
     [x: string]: any;
   };
-  mode?: string,
+  mode?: string;
 }
 
 export interface INote {
@@ -49,7 +55,7 @@ export interface INote {
   tagName?: string;
   attrName?: string;
   splitAttrName?: string;
-  onChange: (props: IOnChangeProps) => (void | boolean | Promise<boolean | void>);
+  onChange: (props: IOnChangeProps) => void | boolean | Promise<boolean | void>;
   rowKey?: string;
   toolBarList?: IToolBarPaneProps[];
   renderToolBar?: (a: any) => ReactNode;
@@ -73,7 +79,6 @@ const Note = ({
     null
   );
 
-
   const parse = useMemo(() => {
     // 用于格式化html文本
     if (template) {
@@ -92,7 +97,7 @@ const Note = ({
     return {
       style: { top: 0, left: 0, arrowLeft: 0 },
       visible: false,
-      className: ""
+      className: '',
     };
   });
 
@@ -102,7 +107,6 @@ const Note = ({
   const toolWrapContainer = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = useCallback(() => {
-
     if (!noteContainer.current) return;
     document.addEventListener(
       'mouseup',
@@ -114,7 +118,7 @@ const Note = ({
 
         const modeClassNames: any = {};
         toolBarList.forEach(item => {
-          modeClassNames[item.mode] = item.className || '';
+          modeClassNames[item.type] = item.className || '';
         });
 
         setCustomValue({
@@ -123,7 +127,7 @@ const Note = ({
           rowKey,
           splitAttrName: customSplitAttr,
           selectedAttr: customSelectedAttr,
-          modeClassNames
+          modeClassNames,
         });
 
         // 返回条件 1. 光标起始点相同（即没有选中文本），2. 起点或者终点不在当前容器内
@@ -152,55 +156,60 @@ const Note = ({
     );
   }, [noteContainer, toolBarList, parse]);
 
+  const handleToggleTool = useCallback(
+    visible => {
+      if (!toolWrapContainer.current) return;
+      const display = !visible ? 'none' : 'block';
+      toolWrapContainer.current.style.display = display;
 
-  const handleToggleTool = useCallback((visible) => {
-    if (!toolWrapContainer.current) return;
-    const display = !visible ? 'none' : 'block';
-    toolWrapContainer.current.style.display = display;
-
-    if (visible) {
-      requestAnimationFrame(() => {
-        if (!toolWrapContainer.current) return;
-        const { height } =
-          toolWrapContainer.current?.parentElement?.getBoundingClientRect() || {};
-        toolWrapContainer.current.style.height = height ? `${height}px` : '100%';
-      });
-    }
-  }, [toolWrapContainer]);
-
-  const handleCancelTool = useCallback(
-    () => {
-      handleToggleTool(false);
-      setSelectText(null);
+      if (visible) {
+        requestAnimationFrame(() => {
+          if (!toolWrapContainer.current) return;
+          const { height } =
+            toolWrapContainer.current?.parentElement?.getBoundingClientRect() ||
+            {};
+          toolWrapContainer.current.style.height = height
+            ? `${height}px`
+            : '100%';
+        });
+      }
     },
-    [handleToggleTool, setSelectText],
+    [toolWrapContainer]
   );
 
-  const handleToolBarClick = useCallback((mode) => {
+  const handleCancelTool = useCallback(() => {
+    handleToggleTool(false);
+    setSelectText(null);
+  }, [handleToggleTool, setSelectText]);
 
-    if (!selectText?.text) return;
+  const handleToolBarClick = useCallback(
+    mode => {
+      if (!selectText?.text) return;
 
-    const { list, text, _isTemp } = selectText;
+      const { list, text, _isTemp } = selectText;
 
-    if (onChange && typeof onChange === 'function') {
+      if (onChange && typeof onChange === 'function') {
+        const data: IOnChangeProps['data'] = { list, text };
 
-      const data: IOnChangeProps['data'] = { list, text };
-
-      if (!_isTemp) {
-        data[rowKey] = selectText[rowKey];
-      }
-
-
-      const result = onChange({ data, action: _isTemp ? 'add' : 'update', mode, });
-
-      Promise.resolve(result).then(data => {
-        if (data === undefined || !!data) {
-          handleCancelTool();
+        if (!_isTemp) {
+          data[rowKey] = selectText[rowKey];
         }
-      });
-    }
-  }, [toolBarList, rowKey, selectText]);
 
+        const result = onChange({
+          data,
+          action: _isTemp ? 'add' : 'update',
+          mode,
+        });
+
+        Promise.resolve(result).then(data => {
+          if (data === undefined || !!data) {
+            handleCancelTool();
+          }
+        });
+      }
+    },
+    [toolBarList, rowKey, selectText]
+  );
 
   useUpdateEffect(() => {
     const list = selectText ? [selectText] : [];
@@ -231,40 +240,47 @@ const Note = ({
     let left: number;
     let arrowLeft: number;
 
-
     if (rangeRect.top > marginVertical + toolContainerRect.height) {
       className = 'up';
-      top = rangeRect.top - wrapContainerRect.top - marginVertical - toolContainerRect.height;
+      top =
+        rangeRect.top -
+        wrapContainerRect.top -
+        marginVertical -
+        toolContainerRect.height;
     } else {
       className = 'down';
       top = rangeRect.bottom - wrapContainerRect.top + marginVertical;
     }
 
-    const leftPoint = (rangeRect.left + rangeRect.right) / 2 - wrapContainerRect.left;
+    const leftPoint =
+      (rangeRect.left + rangeRect.right) / 2 - wrapContainerRect.left;
 
     if (leftPoint - toolContainerRect.width / 2 < 0) {
       left = 0;
       arrowLeft = leftPoint < 6 ? 6 : leftPoint;
-
-    } else if (leftPoint + toolContainerRect.width / 2 > wrapContainerRect.width) {
+    } else if (
+      leftPoint + toolContainerRect.width / 2 >
+      wrapContainerRect.width
+    ) {
       left = wrapContainerRect.width - toolContainerRect.width;
       arrowLeft = wrapContainerRect.left - leftPoint < 6 ? 6 : leftPoint;
     } else {
-      left = (rangeRect.left + rangeRect.right) / 2 - toolContainerRect.width / 2 - wrapContainerRect.left;
+      left =
+        (rangeRect.left + rangeRect.right) / 2 -
+        toolContainerRect.width / 2 -
+        wrapContainerRect.left;
       arrowLeft = leftPoint;
     }
-
 
     setToolInfo({
       style: {
         top,
         left,
-        arrowLeft
+        arrowLeft,
       },
-      className
+      className,
     });
-    console.log("rangeRect", rangeRect);
-
+    console.log('rangeRect', rangeRect);
   }, [snapShoot, wrapContainer]);
 
   return (
@@ -276,21 +292,20 @@ const Note = ({
         onMouseDown={handleMouseDown}
         dangerouslySetInnerHTML={snapShoot}
       />
-      <div
-        className="note-tool-wrap"
-        ref={toolWrapContainer}
-      >
-        <ul className={`note-tool ${toolInfo.className}`} ref={toolContainer} style={toolInfo.style}>
-          {
-            map(toolBarList, item => {
-              return (
-                <li key={item.mode} onClick={() => handleToolBarClick(item.mode)}>
-                  {item.icon}
-                  <i>{item.name}</i>
-                </li>
-              );
-            })
-          }
+      <div className="note-tool-wrap" ref={toolWrapContainer}>
+        <ul
+          className={`note-tool ${toolInfo.className}`}
+          ref={toolContainer}
+          style={toolInfo.style}
+        >
+          {map(toolBarList, item => {
+            return (
+              <li key={item.type} onClick={() => handleToolBarClick(item.type)}>
+                {item.icon}
+                <i>{item.name}</i>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
