@@ -10,9 +10,23 @@ const App = () => {
     console.log(list);
   }, []);
 
+  const list = React.useMemo(() => {
+    return [
+      {
+        code: 'fuzhi',
+        name: '复制',
+        icon: 'ReactNode'
+      }
+    ];
+  }, []);
+
   return (
     <div>
-      <Note template={template} onChange={onChange} />
+      <div style={{ height: 100, backgroundColor: "red" }}></div>
+      <div style={{ padding: " 0 100px", }}>
+        <Note template={template} onChange={onChange} />
+      </div>
+      <div style={{ height: 100, backgroundColor: "red" }}></div>
     </div>
   );
 };

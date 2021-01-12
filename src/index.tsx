@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
 import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
+import useSetState from './hooks/useSetState';
 import getSelectedInfo, { INoteTextHighlightInfoItem } from './getSelectedInfo';
 import {
   customTag as cTag,
@@ -8,6 +9,7 @@ import {
   customRowKey,
   customSplitAttr,
   customSelectedAttr,
+  marginVertical
 } from './constants';
 import { setCustomValue, getCustomValue } from './customAttrValue';
 import { getUUID, getElementLeft, getElementTop } from './tool';
@@ -31,6 +33,8 @@ export interface INote {
   onChange: (a: any) => void;
   rowKey?: string;
 }
+// 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
+let rangeRect: DOMRect;
 
 const Note = ({
   template,
@@ -59,6 +63,15 @@ const Note = ({
     return { __html: parse.getHTML(value) };
   });
 
+  const [toolInfo, setToolInfo] = useSetState(() => {
+    return {
+      style: { top: 0, left: 0, arrowLeft: 0 },
+      visible: false,
+      className: ""
+    };
+  });
+
+  const wrapContainer = useRef<HTMLDivElement>(null);
   const noteContainer = useRef<HTMLDivElement>(null);
   const toolContainer = useRef<HTMLUListElement>(null);
   const toolWrapContainer = useRef<HTMLDivElement>(null);
@@ -69,9 +82,9 @@ const Note = ({
       'mouseup',
       () => {
         const range: Range | undefined = window?.getSelection()?.getRangeAt(0);
-
-        const { collapsed = true, endContainer, startContainer } = range || {};
-
+        if (!range) return;
+        const { collapsed = true, endContainer, startContainer } = range;
+        rangeRect = range.getBoundingClientRect();
         setCustomValue({
           tagName,
           attrName,
@@ -115,10 +128,14 @@ const Note = ({
     const display =
       toolWrapContainer.current.style.display === 'block' ? 'none' : 'block';
     toolWrapContainer.current.style.display = display;
-    if (display === 'none') {
-      const { height } =
-        toolWrapContainer.current.parentElement?.getBoundingClientRect() || {};
-      toolWrapContainer.current.style.height = height ? `${height}px` : '100%';
+    console.log("display", display);
+    if (display === 'block') {
+      requestAnimationFrame(() => {
+        if (!toolWrapContainer.current) return;
+        const { height } =
+          toolWrapContainer.current?.parentElement?.getBoundingClientRect() || {};
+        toolWrapContainer.current.style.height = height ? `${height}px` : '100%';
+      });
     }
   }, [toolWrapContainer]);
 
@@ -136,27 +153,62 @@ const Note = ({
   }, [setSnapShoot, parse, value, selectText]);
 
   useLayoutUpdateEffect(() => {
-    if (!noteContainer.current || !toolContainer.current) return;
-    const nodes = noteContainer.current.querySelectorAll(
+    if (!wrapContainer.current || !toolContainer.current) return;
+    const nodes = wrapContainer.current.querySelectorAll(
       `[${customSelectedAttr}="${selectText?.id}"]`
     );
 
     if (nodes.length < 1) return;
-    console.log(nodes);
     handleToggleTool();
-    const { width, height } = toolContainer.current.getBoundingClientRect();
+    const wrapContainerRect = wrapContainer.current.getBoundingClientRect();
+    const toolContainerRect = toolContainer.current.getBoundingClientRect();
 
-    const positionList: DOMRect[] = [];
-    for (let i = 0; i < nodes.length; i++) {
-      positionList.push(nodes[i].getBoundingClientRect());
+    console.log("wrapContainerRect", wrapContainerRect);
+    let top: number;
+    let className: string;
+    let left: number;
+    let arrowLeft: number;
+
+
+    if (rangeRect.top > marginVertical + toolContainerRect.height) {
+      className = 'up';
+      top = rangeRect.top - wrapContainerRect.top - marginVertical - toolContainerRect.height;
+    } else {
+      className = 'down';
+      top = rangeRect.bottom - wrapContainerRect.top + marginVertical;
     }
-    const { left, right, top } = positionList[0];
-  }, [snapShoot, noteContainer]);
+
+    const leftPoint = (rangeRect.left + rangeRect.right) / 2 - wrapContainerRect.left;
+
+    if (leftPoint - toolContainerRect.width / 2 < 0) {
+      left = 0;
+      arrowLeft = leftPoint < 6 ? 6 : leftPoint;
+
+    } else if (leftPoint + toolContainerRect.width / 2 > wrapContainerRect.width) {
+      left = wrapContainerRect.width - toolContainerRect.width;
+      arrowLeft = wrapContainerRect.left - leftPoint < 6 ? 6 : leftPoint;
+    } else {
+      left = (rangeRect.left + rangeRect.right) / 2 - toolContainerRect.width / 2 - wrapContainerRect.left;
+      arrowLeft = leftPoint;
+    }
+
+
+    setToolInfo({
+      style: {
+        top,
+        left,
+        arrowLeft
+      },
+      className
+    });
+    console.log("rangeRect", rangeRect);
+
+  }, [snapShoot, wrapContainer]);
 
   return (
-    <div>
+    <div className="note-wrap" ref={wrapContainer}>
       <div
-        className="note-wrap"
+        className="note"
         onDoubleClick={handleClick}
         ref={noteContainer}
         onMouseDown={handleMouseDown}
@@ -167,7 +219,7 @@ const Note = ({
         ref={toolWrapContainer}
         onClick={handleToggleTool}
       >
-        <ul className="note-tool down" ref={toolContainer}>
+        <ul className={`note-tool ${toolInfo.className}`} ref={toolContainer} style={toolInfo.style}>
           <li>
             <span className="iconfont icon-huaxian"></span>
             <i>划线</i>

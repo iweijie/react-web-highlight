@@ -140,7 +140,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
         const { start, end, text, uuids } = item;
         // 用于解决文本转标签注入的问题
         const content = escape(text);
-        console.log(item);
+
         const header = uuids.map(uuid => {
           return `<${tagName} ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
         });

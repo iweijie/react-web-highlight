@@ -8,3 +8,5 @@ export const customSplitAttr = 'data-wj-custom-split';
 export const customRowKey = 'id';
 
 export const customSelectedAttr = 'data-wj-custom-id';
+
+export const marginVertical = 15;
