@@ -3,7 +3,6 @@ import FSM from '../parser.js';
 import {
   customAttr as attr,
   customTag as tagName,
-  customSplitAttr,
 } from '../constants';
 import { INoteTextHighlightInfo } from '../index';
 
@@ -36,7 +35,7 @@ class Parse {
 
   getHTML(list?: INoteTextHighlightInfo[]) {
     const snapshot = FSM(this.template);
-    console.log(snapshot);
+
     return getHTML(snapshot, list);
   }
 }

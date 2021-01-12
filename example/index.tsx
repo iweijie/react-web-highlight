@@ -3,19 +3,51 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import template from './htmlString';
 import Note from '../.';
+import { getUUID } from '../src/tool';
 // import './index.css'
 
 const App = () => {
-  const onChange = React.useCallback(list => {
-    console.log(list);
+
+  const [state, setState] = React.useState([]);
+
+  const onChange = React.useCallback(obj => {
+    const { action, data, mode } = obj;
+
+    if (action === 'add') {
+
+      setState((l) => {
+        return [...l, { ...data, id: getUUID(), mode }];
+      });
+    }
   }, []);
 
-  const list = React.useMemo(() => {
+  const toolBarList = React.useMemo(() => {
+
     return [
       {
-        code: 'fuzhi',
+        icon: <span className="iconfont icon-huaxian"></span>,
+        name: '划线',
+        className: 'huaxian',
+        mode: 'huaxian',
+      },
+      {
+
+        icon: <span className="iconfont icon-edit"></span>,
+        name: '笔记',
+        className: 'edit',
+        mode: 'edit',
+      },
+      {
+        icon: <span className="iconfont icon-fuzhi"></span>,
         name: '复制',
-        icon: 'ReactNode'
+        className: 'fuzhi',
+        mode: 'fuzhi',
+      },
+      {
+        icon: <span className="iconfont icon-quxiao"></span>,
+        name: '取消',
+        className: 'quxiao',
+        mode: 'quxiao',
       }
     ];
   }, []);
@@ -24,7 +56,7 @@ const App = () => {
     <div>
       <div style={{ height: 100, backgroundColor: "red" }}></div>
       <div style={{ padding: " 0 100px", }}>
-        <Note template={template} onChange={onChange} />
+        <Note value={state} template={template} onChange={onChange} toolBarList={toolBarList} />
       </div>
       <div style={{ height: 100, backgroundColor: "red" }}></div>
     </div>

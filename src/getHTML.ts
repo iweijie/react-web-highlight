@@ -58,6 +58,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
     attrName,
     selectedAttr,
     rowKey,
+    modeClassNames,
   } = getCustomValue();
 
   const endStr = `</${tagName}>`;
@@ -67,7 +68,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
   if (!options || isEmpty(options)) return;
 
   options.forEach((optionItem, index) => {
-    const { list } = optionItem;
+    const { list, mode } = optionItem;
     const uuid = optionItem[rowKey];
     if (!Array.isArray(list) || !list.length) return;
     list.forEach(item => {
@@ -97,6 +98,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
             isCustom: true,
             custom: {
               uuid,
+              mode,
               list: [item],
               node,
             },
@@ -120,7 +122,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
     });
   });
   translateNodeList.forEach(item => {
-    const { list, node, uuid } = item.custom;
+    const { list, node, uuid, mode } = item.custom;
     // 解决字符转义后路径对应问题
     const content = unescape(node.content);
     // 过滤不匹配文本
@@ -142,7 +144,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
         const content = escape(text);
 
         const header = uuids.map(uuid => {
-          return `<${tagName} ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
+          return `<${tagName} class="${modeClassNames[mode]}" ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
         });
         const footer = uuids.map(uuid => {
           return endStr;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, ReactNode } from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
 import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
 import useSetState from './hooks/useSetState';
@@ -13,15 +13,34 @@ import {
 } from './constants';
 import { setCustomValue, getCustomValue } from './customAttrValue';
 import { getUUID, getElementLeft, getElementTop } from './tool';
-
+import map from 'lodash/map';
 import Parse from './Parse/index';
 import './asset/font/iconfont.css';
 import './index.css';
 
+interface IToolBarPaneProps {
+  name: string;
+  mode: string;
+  className?: string;
+  icon?: ReactNode;
+  render?: (props: any) => ReactNode;
+}
+
 export interface INoteTextHighlightInfo {
   list: INoteTextHighlightInfoItem[];
   text: string;
+  mode?: string,
   [x: string]: any;
+}
+
+interface IOnChangeProps {
+  action: string;
+  data: {
+    list: INoteTextHighlightInfoItem[],
+    text: string;
+    [x: string]: any;
+  };
+  mode?: string,
 }
 
 export interface INote {
@@ -30,11 +49,14 @@ export interface INote {
   tagName?: string;
   attrName?: string;
   splitAttrName?: string;
-  onChange: (a: any) => void;
+  onChange: (props: IOnChangeProps) => (void | boolean | Promise<boolean | void>);
   rowKey?: string;
+  toolBarList?: IToolBarPaneProps[];
+  renderToolBar?: (a: any) => ReactNode;
 }
 // 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
 let rangeRect: DOMRect;
+const defaultToolBarList: IToolBarPaneProps[] = [];
 
 const Note = ({
   template,
@@ -43,11 +65,14 @@ const Note = ({
   tagName = cTag,
   attrName = cAttr,
   rowKey = customRowKey,
+  toolBarList = defaultToolBarList,
   onChange,
+  renderToolBar,
 }: INote) => {
   const [selectText, setSelectText] = useState<INoteTextHighlightInfo | null>(
     null
   );
+
 
   const parse = useMemo(() => {
     // 用于格式化html文本
@@ -77,6 +102,7 @@ const Note = ({
   const toolWrapContainer = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = useCallback(() => {
+
     if (!noteContainer.current) return;
     document.addEventListener(
       'mouseup',
@@ -85,12 +111,19 @@ const Note = ({
         if (!range) return;
         const { collapsed = true, endContainer, startContainer } = range;
         rangeRect = range.getBoundingClientRect();
+
+        const modeClassNames: any = {};
+        toolBarList.forEach(item => {
+          modeClassNames[item.mode] = item.className || '';
+        });
+
         setCustomValue({
           tagName,
           attrName,
           rowKey,
           splitAttrName: customSplitAttr,
           selectedAttr: customSelectedAttr,
+          modeClassNames
         });
 
         // 返回条件 1. 光标起始点相同（即没有选中文本），2. 起点或者终点不在当前容器内
@@ -109,7 +142,7 @@ const Note = ({
         setSelectText({
           _isTemp: true,
           list,
-          text: list.map(d => d.text).join(''),
+          text: map(list, d => d.text).join(''),
           [rowKey]: getUUID(),
         });
       },
@@ -117,19 +150,15 @@ const Note = ({
         once: true,
       }
     );
-  }, [noteContainer, parse]);
+  }, [noteContainer, toolBarList, parse]);
 
-  const handleClick = useCallback(() => {
-    onChange(selectText);
-  }, [onChange, selectText]);
 
-  const handleToggleTool = useCallback(() => {
+  const handleToggleTool = useCallback((visible) => {
     if (!toolWrapContainer.current) return;
-    const display =
-      toolWrapContainer.current.style.display === 'block' ? 'none' : 'block';
+    const display = !visible ? 'none' : 'block';
     toolWrapContainer.current.style.display = display;
-    console.log("display", display);
-    if (display === 'block') {
+
+    if (visible) {
       requestAnimationFrame(() => {
         if (!toolWrapContainer.current) return;
         const { height } =
@@ -139,10 +168,44 @@ const Note = ({
     }
   }, [toolWrapContainer]);
 
+  const handleCancelTool = useCallback(
+    () => {
+      handleToggleTool(false);
+      setSelectText(null);
+    },
+    [handleToggleTool, setSelectText],
+  );
+
+  const handleToolBarClick = useCallback((mode) => {
+
+    if (!selectText?.text) return;
+
+    const { list, text, _isTemp } = selectText;
+
+    if (onChange && typeof onChange === 'function') {
+
+      const data: IOnChangeProps['data'] = { list, text };
+
+      if (!_isTemp) {
+        data[rowKey] = selectText[rowKey];
+      }
+
+
+      const result = onChange({ data, action: _isTemp ? 'add' : 'update', mode, });
+
+      Promise.resolve(result).then(data => {
+        if (data === undefined || !!data) {
+          handleCancelTool();
+        }
+      });
+    }
+  }, [toolBarList, rowKey, selectText]);
+
+
   useUpdateEffect(() => {
     const list = selectText ? [selectText] : [];
     if (value) {
-      value = value.map(item => {
+      value = map(value, item => {
         if (!item || item[rowKey]) return item;
         item[rowKey] = getUUID();
         return item;
@@ -159,11 +222,10 @@ const Note = ({
     );
 
     if (nodes.length < 1) return;
-    handleToggleTool();
+    handleToggleTool(true);
     const wrapContainerRect = wrapContainer.current.getBoundingClientRect();
     const toolContainerRect = toolContainer.current.getBoundingClientRect();
 
-    console.log("wrapContainerRect", wrapContainerRect);
     let top: number;
     let className: string;
     let left: number;
@@ -209,7 +271,7 @@ const Note = ({
     <div className="note-wrap" ref={wrapContainer}>
       <div
         className="note"
-        onDoubleClick={handleClick}
+        // onDoubleClick={handleClick}
         ref={noteContainer}
         onMouseDown={handleMouseDown}
         dangerouslySetInnerHTML={snapShoot}
@@ -217,25 +279,18 @@ const Note = ({
       <div
         className="note-tool-wrap"
         ref={toolWrapContainer}
-        onClick={handleToggleTool}
       >
         <ul className={`note-tool ${toolInfo.className}`} ref={toolContainer} style={toolInfo.style}>
-          <li>
-            <span className="iconfont icon-huaxian"></span>
-            <i>划线</i>
-          </li>
-          <li>
-            <span className="iconfont icon-edit"></span>
-            <i>笔记</i>
-          </li>
-          <li>
-            <span className="iconfont icon-fuzhi"></span>
-            <i>复制</i>
-          </li>
-          <li>
-            <span className="iconfont icon-quxiao"></span>
-            <i>取消</i>
-          </li>
+          {
+            map(toolBarList, item => {
+              return (
+                <li key={item.mode} onClick={() => handleToolBarClick(item.mode)}>
+                  {item.icon}
+                  <i>{item.name}</i>
+                </li>
+              );
+            })
+          }
         </ul>
       </div>
     </div>
