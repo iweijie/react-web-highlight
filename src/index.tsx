@@ -4,10 +4,12 @@ import React, {
   useMemo,
   useRef,
   ReactNode,
+  FC
 } from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
 import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
 import useSetState from './hooks/useSetState';
+import useBoolean from './hooks/useBoolean';
 import getSelectedInfo, { INoteTextHighlightInfoItem } from './getSelectedInfo';
 import {
   customTag as cTag,
@@ -67,18 +69,19 @@ export interface INote {
   tagName?: string;
   attrName?: string;
   splitAttrName?: string;
-  onChange: (props: IOnChangeProps) => void | boolean | Promise<boolean | void>;
+  onChange: (props: IOnChangeProps) => void;
   rowKey?: string;
   toolBarList?: IToolBarPaneProps[];
   renderToolBar?: (a: any) => ReactNode;
-  filterToolBar?: (option: IToolBarPaneProps) => boolean;
+  // filterToolBar?: (option: IToolBarPaneProps, selected: INoteTextHighlightInfo) => boolean;
+  filterToolBar?: (option: IToolBarPaneProps, selected?: INoteTextHighlightInfo) => boolean;
   hasDefaultToolBar?: boolean;
 }
 // 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
 let rangeRect: DOMRect;
 const defaultToolBarList: IToolBarPaneProps[] = [];
 
-const Note = ({
+const Note: FC<INote> = ({
   template,
   value,
   tagName = cTag,
@@ -89,10 +92,12 @@ const Note = ({
   renderToolBar,
   filterToolBar,
   hasDefaultToolBar,
-}: INote) => {
+}) => {
   const [selectText, setSelectText] = useState<INoteTextHighlightInfo | null>(
     null
   );
+
+  const [toolVisible, { toggle, setLeft, setRight }] = useBoolean(false);
 
   const parse = useMemo(() => {
     // 用于格式化html文本
@@ -107,7 +112,7 @@ const Note = ({
   const getToolBarList = useCallback(() => {
     let list: IToolBarPaneProps[] = toolBarList;
     if (filterToolBar) {
-      list = filter(toolBarList, filterToolBar);
+      list = filter(toolBarList, (item, index) => filterToolBar(item));
     }
     return hasDefaultToolBar || hasDefaultToolBar === undefined
       ? [...list, ...defaultToolBarListValue]
@@ -173,6 +178,48 @@ const Note = ({
     });
   }, [noteContainer, toolBarList, parse, setSelectText]);
 
+  const handleToggleTool = useCallback(
+    visible => {
+      if (!toolWrapContainer.current) return;
+      const display = !visible ? 'none' : 'block';
+      toolWrapContainer.current.style.display = display;
+
+      if (visible) {
+        requestAnimationFrame(() => {
+          if (!toolWrapContainer.current) return;
+          const { height } =
+            toolWrapContainer.current?.parentElement?.getBoundingClientRect() ||
+            {};
+          toolWrapContainer.current.style.height = height
+            ? `${height}px`
+            : '100%';
+        });
+      }
+    },
+    [toolWrapContainer]
+  );
+
+  const handleCancelTool = useCallback(() => {
+    console.log("-------,handleCancelTool");
+    handleToggleTool(false);
+    setSelectText(null);
+  }, [handleToggleTool, setSelectText]);
+
+  const handleClick = useCallback(
+    (e) => {
+      if (!noteContainer.current || !e.target) return;
+
+      const uuid = e.target.getAttribute(customSelectedAttr);
+      if (!uuid) return;
+
+      const findData = value?.find(item => item[rowKey] === uuid);
+
+      if (!findData) return;
+      setSelectText(findData);
+    },
+    [noteContainer, handleCancelTool, value],
+  );
+
   const handleMouseDown = useCallback(
     eventDown => {
       if (!noteContainer.current) return;
@@ -207,71 +254,29 @@ const Note = ({
   //   [noteContainer, toolBarList, parse]
   // );
 
-  const handleToggleTool = useCallback(
-    visible => {
-      if (!toolWrapContainer.current) return;
-      const display = !visible ? 'none' : 'block';
-      toolWrapContainer.current.style.display = display;
-
-      if (visible) {
-        requestAnimationFrame(() => {
-          if (!toolWrapContainer.current) return;
-          const { height } =
-            toolWrapContainer.current?.parentElement?.getBoundingClientRect() ||
-            {};
-          toolWrapContainer.current.style.height = height
-            ? `${height}px`
-            : '100%';
-        });
-      }
-    },
-    [toolWrapContainer]
-  );
-
-  const handleCancelTool = useCallback(() => {
-    // debugger
-    handleToggleTool(false);
-    setSelectText(null);
-  }, [handleToggleTool, setSelectText]);
 
   // TODO 感觉异步的体验感不太好， 后续修改
-
   const handleToolBarClick = useCallback(
     mode => {
       if (!selectText) return;
       const { list, text, _isTemp } = selectText;
-
       // 默认取消
       if (mode === cancelType) {
-        handleCancelTool();
-        return;
-      }
-
-      if (mode === copyType) {
+      } else if (mode === copyType) {
         copyToShearPlate(text);
-        handleCancelTool();
-        return;
-      }
-
-      if (onChange && typeof onChange === 'function') {
+      } else if (onChange && typeof onChange === 'function') {
         const data: IOnChangeProps['data'] = { list, text };
 
         if (!_isTemp) {
           data[rowKey] = selectText[rowKey];
         }
 
-        const result = onChange({
+        onChange({
           data,
           action: _isTemp ? 'add' : 'update',
           mode,
         });
 
-        Promise.resolve(result).then(data => {
-          if (data === undefined || !!data) {
-            handleCancelTool();
-          }
-        });
-        return;
       }
       handleCancelTool();
     },
@@ -292,6 +297,7 @@ const Note = ({
   useLayoutUpdateEffect(() => {
     if (!wrapContainer.current || !toolContainer.current || !selectText) return;
     handleToggleTool(true);
+
     const wrapContainerRect = wrapContainer.current.getBoundingClientRect();
     const toolContainerRect = toolContainer.current.getBoundingClientRect();
 
@@ -348,6 +354,7 @@ const Note = ({
         className="note"
         ref={noteContainer}
         onMouseDown={handleMouseDown}
+        onClick={handleClick}
         // onTouchStart={handleTouchstart}
         dangerouslySetInnerHTML={snapShoot}
       />

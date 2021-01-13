@@ -33,10 +33,11 @@
         "singleQuote": true,
         "trailingComma": "es5"
     },
-    "name": "react-text-highlight",
+    "name": "react-web-highlighter",
     "author": "iweijie",
     "module": "dist/web-text.esm.js",
-    "size-limit": [{
+    "size-limit": [
+        {
             "path": "dist/web-text.cjs.production.min.js",
             "limit": "10 KB"
         },

@@ -6,6 +6,9 @@ import Note from '../.';
 import { getUUID } from '../src/tool';
 // import './index.css'
 
+
+
+
 const App = () => {
   const [state, setState] = React.useState([]);
 
@@ -40,13 +43,19 @@ const App = () => {
   return (
     <div>
       <div style={{ height: 100, backgroundColor: 'red' }}></div>
-      <div style={{ padding: ' 0 100px' }}>
+      <div style={{ padding: ' 0 50px', }}>
         <Note
           value={state}
           template={template}
           onChange={onChange}
+          // TODO 这个属性要去掉
           toolBarList={toolBarList}
-        />
+        >
+          {/* TODO 需要用户自定义 */}
+          {/* <ToolBar>
+            <ToolPane></ToolPane>
+          </ToolBar> */}
+        </Note>
       </div>
       <div style={{ height: 100, backgroundColor: 'red' }}></div>
     </div>
@@ -54,3 +63,4 @@ const App = () => {
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
+77;

@@ -20,17 +20,6 @@ export interface IAstElement {
 
 export type IAstItem = IAstElement | IAstText;
 
-// export interface IAstItem {
-//   type: 'element' | 'text';
-//   uuid?: string;
-//   tagName: string;
-//   content?: string;
-//   parent: IAstItem;
-//   attributes: iAttr[];
-//   children: IAstItem[];
-//   [x: string]: any;
-// }
-
 export type iAst = IAstItem[];
 
 declare function parserHTML(htmlStr: string): iAst;
