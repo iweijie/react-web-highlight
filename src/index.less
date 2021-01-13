@@ -1,0 +1,101 @@
+[data-wj-custom-split] {
+  cursor: pointer;
+}
+
+::selection {
+  background-color: #fff2e6;
+}
+
+.note-wrap {
+  position: relative;
+}
+
+.note-tool-wrap {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+}
+
+.note-tool {
+  top: 100px;
+  left: 200px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: absolute;
+  font-weight: 300;
+  height: 64px;
+  background: #484848;
+  color: #fff;
+  align-items: center;
+  justify-content: space-around;
+  display: flex;
+  border-radius: 8px;
+}
+
+.note-tool.up::before {
+  content: '';
+  position: absolute;
+  border-top: 6px solid #484848;
+  border-right: 8px solid rgba(0, 0, 0, 0);
+  border-left: 8px solid rgba(0, 0, 0, 0);
+  width: 0px;
+  height: 0px;
+  bottom: -6px;
+}
+
+.note-tool.down::before {
+  content: '';
+  position: absolute;
+  border-bottom: 6px solid #484848;
+  border-right: 8px solid rgba(0, 0, 0, 0);
+  border-left: 8px solid rgba(0, 0, 0, 0);
+  width: 0px;
+  height: 0px;
+  top: -6px;
+}
+
+.note-tool > li {
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  height: 20px;
+  line-height: 20px;
+  padding-bottom: 8px;
+  padding-top: 36px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  width: 58px;
+  position: relative;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.note-tool > li:hover {
+  background-color: #353535;
+}
+
+.note-tool > li > .iconfont {
+  line-height: 1;
+  position: absolute;
+  font-size: 16px;
+  top: 14px;
+  left: 21px;
+}
+
+.note-tool > li > i {
+  font-style: normal;
+  display: block;
+  -webkit-transform: scale(0.84);
+  transform: scale(0.84);
+  text-align: center;
+  height: 20px;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+}

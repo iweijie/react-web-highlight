@@ -2,12 +2,9 @@ import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import template from './htmlString';
-import Note from '../.';
+import Note from '../src/index';
 import { getUUID } from '../src/tool';
 // import './index.css'
-
-
-
 
 const App = () => {
   const [state, setState] = React.useState([]);
@@ -15,7 +12,7 @@ const App = () => {
   const onChange = React.useCallback(obj => {
     const { action, data, mode } = obj;
     if (action === 'add') {
-      setState(l => {
+      setState((l: any[]) => {
         return [...l, { ...data, id: getUUID(), mode }];
       });
     } else if (action === 'update') {
@@ -43,7 +40,7 @@ const App = () => {
   return (
     <div>
       <div style={{ height: 100, backgroundColor: 'red' }}></div>
-      <div style={{ padding: ' 0 50px', }}>
+      <div style={{ padding: ' 0 50px' }}>
         <Note
           value={state}
           template={template}

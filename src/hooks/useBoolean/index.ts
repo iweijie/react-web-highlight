@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import useToggle, { IAction } from '../useToggle';
 
 function useBoolean(): [boolean, IAction];

@@ -4,7 +4,7 @@ import React, {
   useMemo,
   useRef,
   ReactNode,
-  FC
+  FC,
 } from 'react';
 import useUpdateEffect from './hooks/useUpdateEffect';
 import useLayoutUpdateEffect from './hooks/useLayoutUpdateEffect';
@@ -24,6 +24,8 @@ import defaultToolBarListValue, {
   cancelType,
 } from './defaultToolBarList';
 import { setCustomValue, getCustomValue } from './customAttrValue';
+import ToolBar from './components/ToolBar';
+import ToolPane from './components/ToolPane';
 import {
   getUUID,
   copyToShearPlate,
@@ -36,7 +38,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import Parse from './Parse/index';
 import './asset/font/iconfont.css';
-import './index.css';
+import './index.less';
 
 interface IToolBarPaneProps {
   name: string;
@@ -74,7 +76,10 @@ export interface INote {
   toolBarList?: IToolBarPaneProps[];
   renderToolBar?: (a: any) => ReactNode;
   // filterToolBar?: (option: IToolBarPaneProps, selected: INoteTextHighlightInfo) => boolean;
-  filterToolBar?: (option: IToolBarPaneProps, selected?: INoteTextHighlightInfo) => boolean;
+  filterToolBar?: (
+    option: IToolBarPaneProps,
+    selected?: INoteTextHighlightInfo
+  ) => boolean;
   hasDefaultToolBar?: boolean;
 }
 // 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
@@ -200,13 +205,13 @@ const Note: FC<INote> = ({
   );
 
   const handleCancelTool = useCallback(() => {
-    console.log("-------,handleCancelTool");
+    console.log('-------,handleCancelTool');
     handleToggleTool(false);
     setSelectText(null);
   }, [handleToggleTool, setSelectText]);
 
   const handleClick = useCallback(
-    (e) => {
+    e => {
       if (!noteContainer.current || !e.target) return;
 
       const uuid = e.target.getAttribute(customSelectedAttr);
@@ -217,7 +222,7 @@ const Note: FC<INote> = ({
       if (!findData) return;
       setSelectText(findData);
     },
-    [noteContainer, handleCancelTool, value],
+    [noteContainer, handleCancelTool, value]
   );
 
   const handleMouseDown = useCallback(
@@ -254,7 +259,6 @@ const Note: FC<INote> = ({
   //   [noteContainer, toolBarList, parse]
   // );
 
-
   // TODO 感觉异步的体验感不太好， 后续修改
   const handleToolBarClick = useCallback(
     mode => {
@@ -276,7 +280,6 @@ const Note: FC<INote> = ({
           action: _isTemp ? 'add' : 'update',
           mode,
         });
-
       }
       handleCancelTool();
     },
@@ -358,6 +361,14 @@ const Note: FC<INote> = ({
         // onTouchStart={handleTouchstart}
         dangerouslySetInnerHTML={snapShoot}
       />
+      {/* <ToolBar values={[]} onChange={handleToolBarClick}>
+        <ToolPane
+          mode="test"
+          icon={null}
+          name="取消"
+          handle={handleToolBarClick}
+        />
+      </ToolBar> */}
       <div className="note-tool-wrap" ref={toolWrapContainer}>
         <ul
           className={`note-tool ${toolInfo.className}`}
