@@ -29,10 +29,6 @@ class Parse {
     };
   }
 
-  getCustomValue(key: string) {
-    return key ? this.custom[key] : this.custom;
-  }
-
   getHTML(list?: INoteTextHighlightInfo[]) {
     const snapshot = FSM(this.template);
 

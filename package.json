@@ -23,7 +23,7 @@
         "react": ">=16"
     },
     "husky": {
-        "hooks": {
+        "hooks-iweijie": {
             "pre-commit": "tsdx lint"
         }
     },

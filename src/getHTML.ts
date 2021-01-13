@@ -13,6 +13,12 @@ export interface IType {
 }
 
 export interface ICustomData {
+  d: ICustomD;
+  u: any;
+  m: string;
+}
+
+export interface ICustomD {
   uuid: string | number;
   start: number;
   end: number;
@@ -97,9 +103,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
             ],
             isCustom: true,
             custom: {
-              uuid,
-              mode,
-              list: [item],
+              list: [{ d: item, m: mode, u: uuid }],
               node,
             },
             children: [],
@@ -116,37 +120,39 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
             parentNode.children.splice(index, 1, cNode);
           }
         } else {
-          cNode.custom.list.push(item);
+          cNode.custom.list.push({ d: item, m: mode, u: uuid });
         }
       }
     });
   });
+
   translateNodeList.forEach(item => {
-    const { list, node, uuid, mode } = item.custom;
+    const { list, node } = item.custom;
     // 解决字符转义后路径对应问题
     const content = unescape(node.content);
     // 过滤不匹配文本
-    const filterData = list
-      .filter((item: ICustomData) => {
-        const { start, end, text } = item;
-        const comparisonText = content.slice(start, end);
-        return comparisonText === text;
-      })
-      .map((item: any) => {
-        item.uuid = uuid;
-        return item;
-      });
+    const filterData = list.filter((item: ICustomData) => {
+      const { start, end, text } = item.d;
+      const comparisonText = content.slice(start, end);
+      return comparisonText === text;
+    });
 
-    const newContext = resolveIntersection(filterData, content)
+    const a = resolveIntersection(filterData, content);
+    console.log('list', list);
+    console.log(a);
+    const newContext = a
       .map(item => {
-        const { start, end, text, uuids } = item;
+        const { start, end, text, options } = item;
         // 用于解决文本转标签注入的问题
         const content = escape(text);
 
-        const header = uuids.map(uuid => {
-          return `<${tagName} class="${modeClassNames[mode]}" ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
+        const header = options.map(option => {
+          const { uuid, mode } = option;
+          return `<${tagName} class="${
+            mode ? modeClassNames[mode] : ''
+          }" ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
         });
-        const footer = uuids.map(uuid => {
+        const footer = options.map(() => {
           return endStr;
         });
         return [...header, content, ...footer].filter(Boolean).join('');

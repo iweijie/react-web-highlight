@@ -12,21 +12,9 @@ const App = () => {
   const onChange = React.useCallback(obj => {
     const { action, data, mode } = obj;
     if (action === 'add') {
-      if (mode === 'edit') {
-        return new Promise(r => {
-          // todo something
-          setTimeout(() => {
-            setState(l => {
-              return [...l, { ...data, id: getUUID(), mode }];
-            });
-            r(true);
-          }, 3000);
-        });
-      } else {
-        setState(l => {
-          return [...l, { ...data, id: getUUID(), mode }];
-        });
-      }
+      setState(l => {
+        return [...l, { ...data, id: getUUID(), mode }];
+      });
     } else if (action === 'update') {
       console.log(data);
     }
