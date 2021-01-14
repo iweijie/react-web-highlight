@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import { unescape, escape } from './tool';
 import resolveIntersection from './resolveIntersection';
 import { iAst, IAstItem, iAttr } from './parser';
-import { INoteTextHighlightInfo } from './index';
+import { INoteTextHighlightInfo } from './Note';
 import { getCustomValue } from './customAttrValue';
 
 export interface IType {
@@ -137,10 +137,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
       return comparisonText === text;
     });
 
-    const a = resolveIntersection(filterData, content);
-    console.log('list', list);
-    console.log(a);
-    const newContext = a
+    const newContext = resolveIntersection(filterData, content)
       .map(item => {
         const { start, end, text, options } = item;
         // 用于解决文本转标签注入的问题

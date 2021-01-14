@@ -6,17 +6,11 @@ import React, {
   ReactNode,
   FC,
 } from 'react';
-
+import { IToolPaneWrap } from './index';
 import './index.less';
 
-export interface IToolPane {
-  mode: string;
-  icon: ReactNode;
-  name: string | ReactNode;
-  selectIcon?: ReactNode;
-  selectName?: string | ReactNode;
+export interface IToolPane extends IToolPaneWrap {
   selected?: boolean;
-  handle: (mode: string) => any;
 }
 
 const ToolPane: FC<IToolPane> = ({
@@ -28,8 +22,14 @@ const ToolPane: FC<IToolPane> = ({
   selected,
   handle,
 }) => {
+  const onClick = useCallback(() => {
+    if (handle && typeof handle === 'function') {
+      handle(mode);
+    }
+  }, [handle, mode]);
+
   return (
-    <div className="note-tool-item" key={mode} onClick={() => handle(mode)}>
+    <div className="note-tool-item" key={mode} onClick={onClick}>
       {selected ? selectIcon : icon}
       <i>{selected ? selectName : name}</i>
     </div>

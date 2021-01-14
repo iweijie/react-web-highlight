@@ -4,7 +4,7 @@ import {
   customAttr as attr,
   customTag as tagName,
 } from '../constants';
-import { INoteTextHighlightInfo } from '../index';
+import { INoteTextHighlightInfo } from '../Note';
 
 interface IParseProps {
   template: string;

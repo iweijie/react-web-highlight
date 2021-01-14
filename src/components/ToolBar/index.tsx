@@ -7,6 +7,7 @@ import React, {
   FC,
 } from 'react';
 import ToolPane from '../ToolPane';
+import Context from './context';
 
 import './index.less';
 
@@ -21,6 +22,7 @@ interface IRenderToolPane {
 
 export interface IToolBar {
   visible: boolean;
+  selectedMode?: string;
   values?: any[];
   renderToolBar?: (a: any) => ReactNode;
   renderToolPane?: (options: IRenderToolPane[]) => ReactNode;
@@ -36,12 +38,12 @@ const ToolBar: FC<IToolBar> = ({
   hasDefaultToolBar,
   // onChange,
   children,
+  selectedMode,
   onCancel,
 }) => {
   const toolBar = useMemo(() => {
     const findToolPane: React.ReactNode[] = [];
     React.Children.forEach(children, child => {
-      console.log('findToolPane', child);
       // @ts-ignore
       if (child && child?.type === ToolPane) {
         findToolPane.push(child);
@@ -51,9 +53,15 @@ const ToolBar: FC<IToolBar> = ({
   }, [children]);
 
   return (
-    <div className="note-tool-wrap" onClick={onCancel} style={{ display: visible ? 'block' : 'none' }}>
-      <div className="note-tool">{toolBar}</div>
-    </div >
+    <Context.Provider value={selectedMode}>
+      <div
+        className="note-tool-wrap"
+        onClick={onCancel}
+        style={{ display: visible ? 'block' : 'none' }}
+      >
+        <div className="note-tool">{toolBar}</div>
+      </div>
+    </Context.Provider>
   );
 };
 
