@@ -6,34 +6,19 @@ import React, {
   ReactNode,
   FC,
 } from 'react';
+import ToolPane from './ToolPane';
 
-import './index.less';
-
-export interface IToolPane {
+export interface IToolPaneWrap {
   mode: string;
   icon: ReactNode;
   name: string | ReactNode;
   selectIcon?: ReactNode;
   selectName?: string | ReactNode;
-  selected?: boolean;
   handle: (mode: string) => any;
 }
 
-const ToolPane: FC<IToolPane> = ({
-  mode,
-  icon,
-  name,
-  selectName,
-  selectIcon,
-  selected,
-  handle,
-}) => {
-  return (
-    <div key={mode} onClick={() => handle(mode)}>
-      {icon}
-      <i>{name}</i>
-    </div>
-  );
+const ToolPaneWrap: FC<IToolPaneWrap> = (props) => {
+  return <ToolPane {...props} selected={true}/>;
 };
 
-export default ToolPane;
+export default ToolPaneWrap;

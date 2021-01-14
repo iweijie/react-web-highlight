@@ -4,35 +4,31 @@ import * as ReactDOM from 'react-dom';
 import template from './htmlString';
 import Note from '../src/index';
 import { getUUID } from '../src/tool';
-// import './index.css'
 
 const App = () => {
   const [state, setState] = React.useState([]);
 
   const onChange = React.useCallback(obj => {
-    const { action, data, mode } = obj;
+
+    const { action, payload, mode } = obj;
     if (action === 'add') {
       setState((l: any[]) => {
-        return [...l, { ...data, id: getUUID(), mode }];
+        return [...l, { ...payload, id: getUUID(), mode: mode || "huaxian" }];
       });
     } else if (action === 'update') {
-      console.log(data);
+      console.log(payload);
     }
   }, []);
 
   const toolBarList = React.useMemo(() => {
     return [
       {
-        icon: <span className="iconfont icon-huaxian"></span>,
-        name: '划线',
         className: 'huaxian',
-        type: 'huaxian',
+        mode: 'huaxian',
       },
       {
-        icon: <span className="iconfont icon-edit"></span>,
-        name: '笔记',
         className: 'edit',
-        type: 'edit',
+        mode: 'edit',
       },
     ];
   }, []);
@@ -40,18 +36,13 @@ const App = () => {
   return (
     <div>
       <div style={{ height: 100, backgroundColor: 'red' }}></div>
-      <div style={{ padding: ' 0 50px' }}>
+      <div style={{ padding: ' 0 50px', width: 600 }}>
         <Note
           value={state}
           template={template}
           onChange={onChange}
-          // TODO 这个属性要去掉
-          toolBarList={toolBarList}
+          modes={toolBarList}
         >
-          {/* TODO 需要用户自定义 */}
-          {/* <ToolBar>
-            <ToolPane></ToolPane>
-          </ToolBar> */}
         </Note>
       </div>
       <div style={{ height: 100, backgroundColor: 'red' }}></div>
@@ -60,4 +51,4 @@ const App = () => {
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
-77;
+

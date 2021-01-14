@@ -20,19 +20,23 @@ interface IRenderToolPane {
 }
 
 export interface IToolBar {
+  visible: boolean;
   values?: any[];
   renderToolBar?: (a: any) => ReactNode;
   renderToolPane?: (options: IRenderToolPane[]) => ReactNode;
   className?: string;
   hasDefaultToolBar?: boolean;
-  onChange: (mode: string) => void;
+  // onChange: (mode: string) => void;
+  onCancel: () => void;
 }
 
 const ToolBar: FC<IToolBar> = ({
+  visible,
   renderToolBar,
   hasDefaultToolBar,
-  onChange,
+  // onChange,
   children,
+  onCancel,
 }) => {
   const toolBar = useMemo(() => {
     const findToolPane: React.ReactNode[] = [];
@@ -47,9 +51,9 @@ const ToolBar: FC<IToolBar> = ({
   }, [children]);
 
   return (
-    <div className="note-tool-wrap">
+    <div className="note-tool-wrap" onClick={onCancel} style={{ display: visible ? 'block' : 'none' }}>
       <div className="note-tool">{toolBar}</div>
-    </div>
+    </div >
   );
 };
 
