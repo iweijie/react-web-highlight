@@ -12,17 +12,6 @@ export function unescape(str: string): string {
   return elem.innerText || elem.textContent || '';
 }
 
-let customValue: any = {};
-
-export const getCustomValue = (key?: string): any => {
-  return key ? customValue[key] : customValue;
-};
-export const setCustomValue = (value: object): void => {
-  customValue = {
-    ...customValue,
-    ...value,
-  };
-};
 
 /**
  * 文本复制
@@ -47,18 +36,6 @@ export function classNames(...arg: any[]): string {
   return Object.keys(classNameMap).join(' ');
 }
 
-/** UUID 为零表示当前标记 */
-export const getUUID = (() => {
-  let uuid = 0;
-  return () => {
-    ++uuid;
-    return (
-      Math.random()
-        .toString(16)
-        .slice(2) + uuid
-    );
-  };
-})();
 
 export function getElementLeft(element: any, topNode: any) {
   let actualLeft = element.offsetLeft;

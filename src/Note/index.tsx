@@ -1,8 +1,13 @@
-import React, { useState, useCallback, useMemo, useRef, FC } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  FC,
+  useEffect,
+} from 'react';
 import useUpdateEffect from '../hooks/useUpdateEffect';
-import getSelectedInfo, {
-  INoteTextHighlightInfoItem,
-} from '../getSelectedInfo';
+import getSelectedInfo from '../getSelectedInfo';
 import {
   customTag as cTag,
   customAttr as cAttr,
@@ -10,40 +15,13 @@ import {
   customSplitAttr,
   customSelectedAttr,
 } from '../constants';
-import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate';
 import { setCustomValue } from '../customAttrValue';
 import Context, { INoteContextProps } from './context';
-import ToolBar from '../components/ToolBar';
+import { INote, INoteTextHighlightInfo } from './type';
 import Parse from '../Parse/index';
 import './index.less';
 
 let selectedValue: any;
-
-export interface IModeProps {
-  mode: string;
-  className?: string;
-}
-
-export interface INoteTextHighlightInfo {
-  list: INoteTextHighlightInfoItem[];
-  text: string;
-  mode?: string;
-  [x: string]: any;
-}
-
-export interface INote {
-  template: string;
-  value?: INoteTextHighlightInfo[];
-  tagName?: string;
-  attrName?: string;
-  splitAttrName?: string;
-  onAdd: (props: INoteTextHighlightInfo) => void;
-  onUpdate: (props: INoteTextHighlightInfo[]) => void;
-  rowKey?: string;
-  modes?: IModeProps[];
-}
-// 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
-// let rangeRect: DOMRect;
 
 const Note: FC<INote> = ({
   template,
@@ -177,12 +155,13 @@ const Note: FC<INote> = ({
     };
   }, [selectedValue, wrapContainer]);
 
-  const checkedChildren = useMemo(() => {
-    const child = React.Children.only(children);
-    // @ts-ignore
-    if (child.type !== ToolBar) throw new Error('子元素只能为 ToolBar');
-    return child;
-  }, [children]);
+  // const checkedChildren = useMemo(() => {
+  //   if (!children) return null;
+  //   const child = ;
+  //   // @ts-ignore
+  //   if (child.type !== ToolBar) throw new Error('子元素只能为 ToolBar');
+  //   return child;
+  // }, [children]);
 
   useUpdateEffect(() => {
     setSnapShoot({ __html: parse.getHTML(value) });
@@ -190,15 +169,16 @@ const Note: FC<INote> = ({
 
   return (
     <Context.Provider value={contextValue}>
-      <div className="note-wrap" ref={wrapContainer}>
+      <div className="text-highlight-wrap" ref={wrapContainer}>
         <div
-          className="note"
+          className="text-highlight"
+          id="text-highlight"
           ref={noteContainer}
           onMouseDown={handleMouseDown}
           onClick={handleClick}
           dangerouslySetInnerHTML={snapShoot}
         />
-        {checkedChildren}
+        {children}
       </div>
     </Context.Provider>
   );

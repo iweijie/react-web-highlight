@@ -1,4 +1,5 @@
-import Note from './Note';
-import NoteWithTool from './NoteWithTool';
+import Note from './Note/index';
+import ToolBar from './ToolBar/index';
 
-export { Note, NoteWithTool };
+export default Note;
+export { ToolBar };

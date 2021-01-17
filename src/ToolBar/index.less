@@ -1,18 +1,19 @@
-// .note-tool-wrap {
-//   display: none;
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   width: 100%;
-//   height: 100%;
-//   z-index: 10000;
-// }
+.note-none {
+  display: none;
+}
+.note-tool-mask {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 
 .note-tool {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: none;
   position: absolute;
   font-weight: 300;
   height: 64px;
@@ -20,8 +21,8 @@
   color: #fff;
   align-items: center;
   justify-content: space-around;
+  display: flex;
   border-radius: 8px;
-  z-index: 10000;
 
   &.up::before {
     content: '';
