@@ -24,6 +24,29 @@ export const setCustomValue = (value: object): void => {
   };
 };
 
+/**
+ * 文本复制
+ */
+
+export function classNames(...arg: any[]): string {
+  // @ts-ignore
+  const classNameMap = arg.reduce((classNameMap, name) => {
+    classNameMap as object;
+    if (typeof name === 'string') {
+      classNameMap[name] = true;
+    } else if (typeof name === 'object') {
+      Object.keys(name).forEach(key => {
+        if (name[key]) {
+          classNameMap[key] = true;
+        }
+      });
+    }
+    return classNameMap;
+  }, {});
+
+  return Object.keys(classNameMap).join(' ');
+}
+
 /** UUID 为零表示当前标记 */
 export const getUUID = (() => {
   let uuid = 0;

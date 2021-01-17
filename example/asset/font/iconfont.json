@@ -1,0 +1,37 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "954218",
+      "name": "取消",
+      "font_class": "quxiao",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "5589026",
+      "name": "edit",
+      "font_class": "edit",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "9545594",
+      "name": "复制",
+      "font_class": "fuzhi",
+      "unicode": "e598",
+      "unicode_decimal": 58776
+    },
+    {
+      "icon_id": "14129046",
+      "name": "划线",
+      "font_class": "huaxian",
+      "unicode": "ea0d",
+      "unicode_decimal": 59917
+    }
+  ]
+}

@@ -12,8 +12,12 @@ import {
 } from '../constants';
 import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate';
 import { setCustomValue } from '../customAttrValue';
+import Context, { INoteContextProps } from './context';
+import ToolBar from '../components/ToolBar';
 import Parse from '../Parse/index';
 import './index.less';
+
+let selectedValue: any;
 
 export interface IModeProps {
   mode: string;
@@ -36,7 +40,7 @@ export interface INote {
   onAdd: (props: INoteTextHighlightInfo) => void;
   onUpdate: (props: INoteTextHighlightInfo[]) => void;
   rowKey?: string;
-  modes: IModeProps[];
+  modes?: IModeProps[];
 }
 // 设置一个单独变量的目的是因为只能选中一个区域， 不存在选中多处区域的缘故
 // let rangeRect: DOMRect;
@@ -50,6 +54,7 @@ const Note: FC<INote> = ({
   onAdd,
   onUpdate,
   modes,
+  children,
 }) => {
   const parse = useMemo(() => {
     // 用于格式化html文本
@@ -66,6 +71,7 @@ const Note: FC<INote> = ({
   });
 
   const noteContainer = useRef<HTMLDivElement>(null);
+  const wrapContainer = useRef<HTMLDivElement>(null);
 
   const handleSelectedText = useCallback(() => {
     const range: Range | undefined = window?.getSelection()?.getRangeAt(0);
@@ -76,11 +82,13 @@ const Note: FC<INote> = ({
     const { collapsed = true, endContainer, startContainer } = range;
 
     const modeClassNames: any = {};
-    modes.forEach(item => {
-      if (item.mode) {
-        modeClassNames[item.mode] = item.className || '';
-      }
-    });
+    if (modes && modes.length) {
+      modes.forEach(item => {
+        if (item.mode) {
+          modeClassNames[item.mode] = item.className || '';
+        }
+      });
+    }
 
     setCustomValue({
       tagName,
@@ -105,10 +113,14 @@ const Note: FC<INote> = ({
       noteContainer: noteContainer.current,
     });
 
-    onAdd({
+    const data = {
       list,
       text: text,
-    });
+    };
+
+    selectedValue = data;
+
+    onAdd(data);
   }, [noteContainer, modes, parse]);
 
   const handleClick = useCallback(
@@ -158,18 +170,37 @@ const Note: FC<INote> = ({
     [noteContainer]
   );
 
+  const contextValue = useMemo(() => {
+    return {
+      selectedValue,
+      wrapContainer,
+    };
+  }, [selectedValue, wrapContainer]);
+
+  const checkedChildren = useMemo(() => {
+    const child = React.Children.only(children);
+    // @ts-ignore
+    if (child.type !== ToolBar) throw new Error('子元素只能为 ToolBar');
+    return child;
+  }, [children]);
+
   useUpdateEffect(() => {
     setSnapShoot({ __html: parse.getHTML(value) });
   }, [setSnapShoot, parse, value]);
 
   return (
-    <div
-      className="note"
-      ref={noteContainer}
-      onMouseDown={handleMouseDown}
-      onClick={handleClick}
-      dangerouslySetInnerHTML={snapShoot}
-    />
+    <Context.Provider value={contextValue}>
+      <div className="note-wrap" ref={wrapContainer}>
+        <div
+          className="note"
+          ref={noteContainer}
+          onMouseDown={handleMouseDown}
+          onClick={handleClick}
+          dangerouslySetInnerHTML={snapShoot}
+        />
+        {checkedChildren}
+      </div>
+    </Context.Provider>
   );
 };
 
