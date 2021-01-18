@@ -11,21 +11,23 @@ import { copyToShearPlate, getUUID } from './util';
 import './asset/font/iconfont.css';
 import './index.less';
 
-console.log('Note:', Note);
-
 const { useCallback, useMemo, useState } = React;
 
 const toolBarList = [
   {
     className: 'huaxian',
     mode: 'huaxian',
+    name: '划线',
   },
   {
     className: 'edit',
     mode: 'edit',
+    name: '笔记',
   },
   {
-    mode: 'fuzhi',
+    mode: 'temp',
+    className: 'temp',
+    name: '临时变量',
   },
 ];
 
@@ -36,10 +38,13 @@ const App = () => {
     action: undefined,
     selectText: null,
     visible: false,
+    textAreaVisible: false,
+    textAreaValue: '',
+    selectedUpdateNoteID: '',
   });
 
-  const { action, selectText, visible } = state;
-  console.log('action', action, state);
+  const { action, selectText, textAreaValue } = state;
+
   const onAdd = useCallback(
     selectText => {
       console.log('selectText', selectText);
@@ -70,11 +75,52 @@ const App = () => {
     [selectText]
   );
 
-  const onToolBarCancel = useCallback(() => {
-    setState({
-      visible: false,
+  const onToolBarCancel = useCallback(
+    (visibleLabel = 'visible') => {
+      setState({
+        [visibleLabel]: false,
+      });
+    },
+    [setState]
+  );
+
+  const onToolBarTextAreaCancel = useCallback(() => {
+    onToolBarCancel('textAreaVisible');
+    setData(l => {
+      return l.filter(item => item.mode !== 'temp');
     });
-  }, [setState]);
+    setState({
+      textAreaValue: '',
+    });
+  }, [onToolBarCancel, setData, setState]);
+
+  const handleSubmitNote = useCallback(() => {
+    return new Promise((r, j) => {
+      const selectTextData = data.find(d => d.mode === 'temp');
+      if (!selectTextData) throw new Error('数据错误');
+
+      setTimeout(() => {
+        r({
+          code: 0,
+          data: {
+            ...selectTextData,
+            mode: 'edit',
+            note: textAreaValue,
+            id: getUUID(),
+          },
+          message: '新增成功',
+        });
+      }, 2000);
+    }).then((data: any) => {
+      if (data.code !== 0) throw data;
+      onToolBarTextAreaCancel();
+      console.log(data.message);
+      setData(d => {
+        const list = d.filter(item => item.mode !== 'temp');
+        return list.concat(data.data);
+      });
+    });
+  }, [data, textAreaValue]);
 
   const ToolPanes = useMemo(() => {
     if (action === 'add') {
@@ -94,11 +140,14 @@ const App = () => {
           <div
             className="note-tool-item"
             onClick={() => {
-              console.log('selectText', selectText);
-              setTimeout(() => {
-                selectRange(selectText);
+              setState({
+                visible: false,
+                textAreaVisible: true,
               });
-              onToolBarCancel();
+              selectRange(selectText);
+              setData(d => {
+                return d.concat({ ...selectText, mode: 'temp', id: getUUID() });
+              });
             }}
           >
             <span className="iconfont icon-edit"></span>
@@ -136,7 +185,7 @@ const App = () => {
         </div>
       </>
     );
-  }, [action, selectText, onToolPaneAdd]);
+  }, [action, setState, selectText, onToolPaneAdd]);
 
   return (
     <div style={{ padding: ' 0 50px', width: 600 }}>
@@ -147,12 +196,25 @@ const App = () => {
         onAdd={onAdd}
         onUpdate={onUpdate}
       >
-        <ToolBar
-          // autoClosable={false}
-          visible={state.visible}
-          onCancel={onToolBarCancel}
-        >
+        <ToolBar visible={state.visible} onCancel={onToolBarCancel}>
           {ToolPanes}
+        </ToolBar>
+        <ToolBar
+          visible={state.textAreaVisible}
+          onCancel={onToolBarTextAreaCancel}
+        >
+          <div className="edit-textarea-wrap">
+            <textarea
+              className="edit-textarea"
+              value={state.textAreaValue}
+              onChange={e => {
+                setState({
+                  textAreaValue: e.target.value,
+                });
+              }}
+            ></textarea>
+            <button onClick={handleSubmitNote}>提交</button>
+          </div>
         </ToolBar>
       </Note>
     </div>

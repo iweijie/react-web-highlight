@@ -120,7 +120,7 @@ const ToolBar: FC<IToolBarProps> = props => {
 
     // TODO 没有想到好的方式去移除弹窗，后续优化
     setTimeout(() => {
-      document.addEventListener('click', handle, { once: true });
+      document.addEventListener('click', handle);
     });
 
     return () => {
