@@ -148,7 +148,7 @@ const App = () => {
         onUpdate={onUpdate}
       >
         <ToolBar
-          autoClosable={false}
+          // autoClosable={false}
           visible={state.visible}
           onCancel={onToolBarCancel}
         >

@@ -1,9 +1,18 @@
-import React, { useRef, ReactNode, useContext, FC, useEffect } from 'react';
+import React, {
+  useRef,
+  ReactNode,
+  useContext,
+  FC,
+  useEffect,
+  ReactEventHandler,
+} from 'react';
 import useSetState from '../hooks/useSetState';
 import context from '../Note/context';
 import { marginVertical } from '../constants';
 
 import { classNames } from '../tool';
+import insideElement from '../insideElement';
+
 import { IToolBarProps, IToolBarState } from './type';
 import './index.less';
 
@@ -97,17 +106,16 @@ const ToolBar: FC<IToolBarProps> = props => {
     toolContainer.current.classList.remove('up', 'down');
     toolContainer.current.classList.add(toolClassName);
 
-    const handle = () => {
+    const handle = (e: Event) => {
       if (
         !toolContainer.current ||
         typeof onCancel !== 'function' ||
-        !autoClosable
+        insideElement(e.target as Element, toolContainer.current)
       )
         return;
-      onCancel();
-      // setState({
-      //   visible: false,
-      // });
+      if (autoClosable) {
+        onCancel();
+      }
     };
 
     // TODO 没有想到好的方式去移除弹窗，后续优化
