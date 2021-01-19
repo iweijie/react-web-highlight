@@ -8,6 +8,7 @@
         "build": "parcel build index.html"
     },
     "dependencies": {
+        "ahooks": "^2.9.4",
         "react-app-polyfill": "^1.0.0"
     },
     "alias": {

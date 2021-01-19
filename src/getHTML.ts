@@ -64,7 +64,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
     attrName,
     selectedAttr,
     rowKey,
-    modeClassNames,
+    modeClassNames = {},
   } = getCustomValue();
 
   const endStr = `</${tagName}>`;

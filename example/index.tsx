@@ -4,15 +4,22 @@ import * as ReactDOM from 'react-dom';
 import template from './htmlString';
 import Note from '../src/Note/index';
 import ToolBar from '../src/ToolBar/index';
-import useSetState from '../src/hooks/useSetState';
-import selectRange from '../src/selectRange';
-import { copyToShearPlate, getUUID } from './util';
-
+// import useSetState from '../src/hooks/useSetState';
+// import usePersistFn from '../src/hooks/usePersistFn';
+import { useSetState, usePersistFn } from 'ahooks';
+import setSelectRange from '../src/setSelectRange';
+import { isEmpty } from 'lodash';
+import {
+  copyToShearPlate,
+  getUUID,
+  setLocalStorage,
+  getLocalStorage,
+} from './util';
 import './asset/font/iconfont.css';
 import './index.less';
 
 const { useCallback, useMemo, useState } = React;
-
+const tempName = 'iweijie-temp';
 const toolBarList = [
   {
     className: 'huaxian',
@@ -32,22 +39,51 @@ const toolBarList = [
 ];
 
 const App = () => {
-  const [data, setData] = useState<any>([]);
+  const [data, handleData] = useState<any>(() => {
+    return ((getLocalStorage(tempName) as Array<any>) || []).filter(
+      item => item.mode !== 'temp'
+    );
+  });
+
+  // 代理数据，本地存储
+  const setData = useCallback(
+    fn => {
+      handleData(data => {
+        let part;
+        if (typeof fn === 'function') {
+          part = fn(data);
+        } else {
+          part = fn;
+        }
+
+        setLocalStorage(tempName, part);
+
+        return part;
+      });
+    },
+    [handleData]
+  );
 
   const [state, setState] = useSetState<any>({
     action: undefined,
     selectText: null,
+    selectTextMap: {
+      huaxian: null,
+      edit: null,
+    },
+    // 1：只有划线； 2：只有笔记；3：划线和笔记
+    updateSelectedMode: 0,
     visible: false,
+    loading: false,
     textAreaVisible: false,
     textAreaValue: '',
     selectedUpdateNoteID: '',
   });
 
-  const { action, selectText, textAreaValue } = state;
+  const { action, updateSelectedMode, selectText, textAreaValue } = state;
 
   const onAdd = useCallback(
     selectText => {
-      console.log('selectText', selectText);
       setState({
         action: 'add',
         selectText,
@@ -57,14 +93,44 @@ const App = () => {
     [setState]
   );
 
-  const onUpdate = useCallback(obj => {
-    console.log(obj);
+  const onUpdate = useCallback((list = []) => {
+    const hasHuaxian = !isEmpty(list.filter(item => item.mode === 'huaxian'));
+    const hasEdit = !isEmpty(list.filter(item => item.mode === 'edit'));
+    const huaxian = list.find(item => item.mode === 'huaxian');
+    const edit = list
+      .sort((a, b) => b.createTime - a.createTime)
+      .find(item => item.mode === 'edit');
+    const updateSelectedMode =
+      hasHuaxian && hasEdit ? 3 : hasHuaxian ? 1 : hasEdit ? 2 : 0;
+
+    const param: any = {
+      action: 'update',
+      selectTextMap: {
+        huaxian,
+        edit,
+      },
+      updateSelectedMode,
+      selectText,
+    };
+
+    if (updateSelectedMode === 2) {
+      param.visible = false;
+      param.textAreaVisible = true;
+      param.textAreaValue = edit.note;
+    }
+
+    setState(param);
   }, []);
 
   const onToolPaneAdd = useCallback(
     mode => {
       setData(d => {
-        return d.concat({ ...selectText, mode, id: getUUID() });
+        return d.concat({
+          ...selectText,
+          mode,
+          id: getUUID(),
+          createTime: Date.now(),
+        });
       });
       setState({
         selectText: null,
@@ -85,55 +151,57 @@ const App = () => {
   );
 
   const onToolBarTextAreaCancel = useCallback(() => {
-    onToolBarCancel('textAreaVisible');
     setData(l => {
       return l.filter(item => item.mode !== 'temp');
     });
     setState({
       textAreaValue: '',
+      textAreaVisible: false,
     });
-  }, [onToolBarCancel, setData, setState]);
+  }, [setData, setState]);
+
+  const onToolBarHuaxianCancel = useCallback(() => {
+    setData(l => {
+      return l.filter(item => item.mode !== 'temp');
+    });
+    setState({
+      textAreaValue: '',
+      textAreaVisible: false,
+    });
+  }, [setData, setState]);
 
   const handleSubmitNote = useCallback(() => {
-    return new Promise((r, j) => {
-      const selectTextData = data.find(d => d.mode === 'temp');
-      if (!selectTextData) throw new Error('数据错误');
+    setData(data => {
+      const index = data.findIndex(d => d.mode === 'temp');
+      const insertData = {
+        ...data[index],
+        mode: 'edit',
+        note: textAreaValue,
+        id: getUUID(),
+        createTime: Date.now(),
+      };
 
-      setTimeout(() => {
-        r({
-          code: 0,
-          data: {
-            ...selectTextData,
-            mode: 'edit',
-            note: textAreaValue,
-            id: getUUID(),
-          },
-          message: '新增成功',
-        });
-      }, 2000);
-    }).then((data: any) => {
-      if (data.code !== 0) throw data;
-      onToolBarTextAreaCancel();
-      console.log(data.message);
-      setData(d => {
-        const list = d.filter(item => item.mode !== 'temp');
-        return list.concat(data.data);
-      });
+      data.splice(index === -1 ? 0 : index, 1, insertData);
+
+      return data;
     });
-  }, [data, textAreaValue]);
+
+    onToolBarTextAreaCancel();
+
+    console.log('添加笔记成功');
+  }, [data, selectText, textAreaValue]);
+
+  const handleSubmitLineation = usePersistFn(() => {
+    // todo something
+    onToolPaneAdd('huaxian');
+    onToolBarCancel();
+  });
 
   const ToolPanes = useMemo(() => {
     if (action === 'add') {
       return (
         <>
-          <div
-            className="note-tool-item"
-            onClick={() => {
-              // todo something
-              onToolPaneAdd('huaxian');
-              onToolBarCancel();
-            }}
-          >
+          <div className="note-tool-item" onClick={handleSubmitLineation}>
             <span className="iconfont icon-huaxian"></span>
             <i>划线</i>
           </div>
@@ -144,7 +212,7 @@ const App = () => {
                 visible: false,
                 textAreaVisible: true,
               });
-              selectRange(selectText);
+              setSelectRange(selectText);
               setData(d => {
                 return d.concat({ ...selectText, mode: 'temp', id: getUUID() });
               });
@@ -168,11 +236,13 @@ const App = () => {
       );
     }
 
+    if (action === 'add' && updateSelectedMode === 2) return;
+
     return (
       <>
-        <div className="note-tool-item">
+        <div className="note-tool-item" onClick={onToolBarHuaxianCancel}>
           <span className="iconfont icon-huaxian"></span>
-          <i>划线</i>
+          <i>取消划线</i>
         </div>
         <div className="note-tool-item">
           <span className="iconfont icon-edit"></span>
@@ -188,7 +258,7 @@ const App = () => {
   }, [action, setState, selectText, onToolPaneAdd]);
 
   return (
-    <div style={{ padding: ' 0 50px', width: 600 }}>
+    <div style={{ padding: ' 0 50px' }}>
       <Note
         value={data}
         template={template}

@@ -1,5 +1,6 @@
 import { INoteTextHighlightInfo } from './Note/type';
 import { getCustomValue } from './customAttrValue';
+// import translateSelectedTextToRang from './translateSelectedTextToRang';
 
 const getNode = (wrap: Node, path: number[]): Node | undefined => {
   if (!wrap || !path.length) return;
@@ -16,30 +17,45 @@ const getNode = (wrap: Node, path: number[]): Node | undefined => {
 // TODO 这是一坨代码， 要修改， 太困了先写着
 // 这里有BUG
 const getRealNodeAndOffset = (node: Node | Element, offset: number) => {
-  const {
-    tagName,
-    splitAttrName,
-    attrName,
-    selectedAttr,
-    rowKey,
-    modeClassNames,
-  } = getCustomValue();
+  const { attrName } = getCustomValue();
+
+  // 当前节点可能为自定义分割节点
+  const wrap = node;
+
+  // 节点为元素，且需要是自定义元素，有挂载自定义属性的元素都为自定义元素
   if (node instanceof Element) {
     if (node.getAttribute(attrName)) {
-      let num = 0;
+      let textOffset = 0;
       let index = 0;
-      let n = node.childNodes[index];
+      node = wrap.childNodes[index];
 
-      while (n && num < offset) {
-        num += n?.textContent?.length || 0;
-        if (num >= offset) {
-          break;
+      outer: while (node && textOffset < offset) {
+        // 选中开始节点 - 选中的结束节点 之间的文本节点都为选中文本
+        // 只标记文本节点
+        if (node.nodeType === 3) {
+          textOffset += node?.textContent?.length || 0;
+          if (textOffset >= offset) break;
         }
-        index++;
-        n = node.childNodes[index];
+
+        if (node.childNodes.length) {
+          node = node.childNodes[0];
+        } else if (node.nextSibling) {
+          node = node.nextSibling;
+        } else {
+          do {
+            node = node?.parentNode as Element;
+            if (wrap === node) {
+              break outer;
+            }
+          } while (!node.nextSibling);
+          node = node.nextSibling as Element;
+        }
       }
 
-      return { node: n, offset: (n.textContent?.length || 0) - (num - offset) };
+      return {
+        node,
+        offset: (node.textContent?.length || 0) - (textOffset - offset),
+      };
     }
     throw new Error('元素类型错误');
   }
@@ -68,3 +84,8 @@ const selectRange = (data: INoteTextHighlightInfo) => {
 };
 
 export default selectRange;
+
+/**
+ * 将选中的数据转化为 Rang
+ * @param param0
+ */

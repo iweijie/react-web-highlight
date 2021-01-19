@@ -26,3 +26,24 @@ export function copyToShearPlate(str: string): void {
   document.execCommand('copy');
   document.body.removeChild(input);
 }
+
+
+export const getLocalStorage = <T>(name: string): T | null => {
+  const local = localStorage.getItem(name);
+  if (!local) return null;
+  try {
+    return JSON.parse(local);
+  } catch (err) {
+    return null;
+  }
+};
+
+export const setLocalStorage = <T>(name: string, value: T): boolean => {
+  if (!value || !name) return false;
+  try {
+    localStorage.setItem(name, JSON.stringify(value));
+    return true;
+  } catch (err) {}
+
+  return false;
+};

@@ -45,7 +45,7 @@ const Note: FC<INote> = ({
   }, []);
 
   const [snapShoot, setSnapShoot] = useState(() => {
-    return { __html: parse.getHTML(value) };
+    return { __html: '' };
   });
 
   const noteContainer = useRef<HTMLDivElement>(null);
@@ -58,24 +58,6 @@ const Note: FC<INote> = ({
     const text = range.toString();
 
     const { collapsed = true, endContainer, startContainer } = range;
-
-    const modeClassNames: any = {};
-    if (modes && modes.length) {
-      modes.forEach(item => {
-        if (item.mode) {
-          modeClassNames[item.mode] = item.className || '';
-        }
-      });
-    }
-
-    setCustomValue({
-      tagName,
-      attrName,
-      rowKey,
-      splitAttrName: customSplitAttr,
-      selectedAttr: customSelectedAttr,
-      modeClassNames,
-    });
 
     // 返回条件 1. 光标起始点相同（即没有选中文本），2. 起点或者终点不在当前容器内
     if (
@@ -155,17 +137,27 @@ const Note: FC<INote> = ({
     };
   }, [selectedValue, wrapContainer]);
 
-  // const checkedChildren = useMemo(() => {
-  //   if (!children) return null;
-  //   const child = ;
-  //   // @ts-ignore
-  //   if (child.type !== ToolBar) throw new Error('子元素只能为 ToolBar');
-  //   return child;
-  // }, [children]);
+  useEffect(() => {
+    // TODO 不造是否有更好的设置值的方式，后续如果有再修改
+    const modeClassNames: any = {};
+    if (modes && modes.length) {
+      modes.forEach(item => {
+        if (item.mode) {
+          modeClassNames[item.mode] = item.className || '';
+        }
+      });
+    }
+    setCustomValue({
+      tagName,
+      attrName,
+      rowKey,
+      splitAttrName: customSplitAttr,
+      selectedAttr: customSelectedAttr,
+      modeClassNames,
+    });
 
-  useUpdateEffect(() => {
     setSnapShoot({ __html: parse.getHTML(value) });
-  }, [setSnapShoot, parse, value]);
+  }, [setSnapShoot, parse, value, modes]);
 
   return (
     <Context.Provider value={contextValue}>
