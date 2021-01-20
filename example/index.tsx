@@ -1,11 +1,13 @@
+/**
+ * 写了一堆代码，实现了 极客时间的标注功能 ...
+ */
+
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import template from './htmlString';
+import template from './note/1';
 import Note from '../src/Note/index';
 import ToolBar from '../src/ToolBar/index';
-// import useSetState from '../src/hooks/useSetState';
-// import usePersistFn from '../src/hooks/usePersistFn';
 import { useSetState, usePersistFn } from 'ahooks';
 import setSelectRange from '../src/setSelectRange';
 import { isEmpty } from 'lodash';
@@ -80,7 +82,14 @@ const App = () => {
     selectedUpdateNoteID: '',
   });
 
-  const { action, updateSelectedMode, selectText, textAreaValue } = state;
+  const {
+    action,
+    updateSelectedMode,
+    selectTextMap,
+    selectText,
+    textAreaValue,
+    selectedUpdateNoteID,
+  } = state;
 
   const onAdd = useCallback(
     selectText => {
@@ -94,9 +103,12 @@ const App = () => {
   );
 
   const onUpdate = useCallback((list = []) => {
+    console.log(list);
+
     const hasHuaxian = !isEmpty(list.filter(item => item.mode === 'huaxian'));
     const hasEdit = !isEmpty(list.filter(item => item.mode === 'edit'));
     const huaxian = list.find(item => item.mode === 'huaxian');
+    // 自定义规则选择一条
     const edit = list
       .sort((a, b) => b.createTime - a.createTime)
       .find(item => item.mode === 'edit');
@@ -117,6 +129,8 @@ const App = () => {
       param.visible = false;
       param.textAreaVisible = true;
       param.textAreaValue = edit.note;
+    } else if (updateSelectedMode === 1 || updateSelectedMode === 3) {
+      param.visible = true;
     }
 
     setState(param);
@@ -155,41 +169,70 @@ const App = () => {
       return l.filter(item => item.mode !== 'temp');
     });
     setState({
+      selectedUpdateNoteID: '',
       textAreaValue: '',
       textAreaVisible: false,
     });
   }, [setData, setState]);
 
   const onToolBarHuaxianCancel = useCallback(() => {
-    setData(l => {
-      return l.filter(item => item.mode !== 'temp');
-    });
+    const { huaxian } = selectTextMap;
+    if (huaxian) {
+      setData(data => {
+        return data.filter(d => d !== huaxian);
+      });
+    }
+
+    onToolBarCancel();
+  }, [setData, setState, selectTextMap]);
+
+  const onToolBarEditShow = useCallback(() => {
+    const { edit } = selectTextMap || {};
+    if (!edit) return;
+    setSelectRange(edit);
     setState({
-      textAreaValue: '',
-      textAreaVisible: false,
+      visible: false,
+      textAreaValue: edit.note,
+      textAreaVisible: true,
+      selectedUpdateNoteID: edit.id,
     });
-  }, [setData, setState]);
+  }, [setData, setState, selectTextMap]);
 
   const handleSubmitNote = useCallback(() => {
     setData(data => {
-      const index = data.findIndex(d => d.mode === 'temp');
-      const insertData = {
-        ...data[index],
-        mode: 'edit',
-        note: textAreaValue,
-        id: getUUID(),
-        createTime: Date.now(),
-      };
 
-      data.splice(index === -1 ? 0 : index, 1, insertData);
+      if (action === 'add') {
+        const index = data.findIndex(d => d.mode === 'temp');
+        const insertData = {
+          ...data[index],
+          mode: 'edit',
+          note: textAreaValue,
+          id: getUUID(),
+          createTime: Date.now(),
+        };
+
+        data.splice(index === -1 ? 0 : index, 1, insertData);
+
+        console.log('添加笔记成功');
+      } else if (action === 'update') {
+        const { edit } = selectTextMap;
+        if (!edit) return;
+        edit.note = textAreaValue;
+        console.log('更新笔记成功');
+      }
 
       return data;
     });
 
     onToolBarTextAreaCancel();
+  }, [data, selectText, selectTextMap, action, textAreaValue]);
 
-    console.log('添加笔记成功');
-  }, [data, selectText, textAreaValue]);
+  const handleDeleteNote = useCallback(() => {
+    setData(data => {
+      return data.filter(item => item.id !== selectedUpdateNoteID);
+    });
+    onToolBarTextAreaCancel();
+  }, [selectedUpdateNoteID, onToolBarTextAreaCancel, setData]);
 
   const handleSubmitLineation = usePersistFn(() => {
     // todo something
@@ -235,27 +278,32 @@ const App = () => {
         </>
       );
     }
-
-    if (action === 'add' && updateSelectedMode === 2) return;
-
-    return (
-      <>
-        <div className="note-tool-item" onClick={onToolBarHuaxianCancel}>
-          <span className="iconfont icon-huaxian"></span>
-          <i>取消划线</i>
-        </div>
-        <div className="note-tool-item">
-          <span className="iconfont icon-edit"></span>
-          <i>笔记</i>
-        </div>
-
-        <div className="note-tool-item">
-          <span className="iconfont icon-fuzhi"></span>
-          <i>复制</i>
-        </div>
-      </>
-    );
-  }, [action, setState, selectText, onToolPaneAdd]);
+    // 纯笔记编辑
+    if (action === 'update') {
+      if (updateSelectedMode === 2) return;
+      return (
+        <>
+          <div className="note-tool-item" onClick={onToolBarHuaxianCancel}>
+            <span className="iconfont icon-huaxian"></span>
+            <i>取消划线</i>
+          </div>
+          {updateSelectedMode === 3 ? (
+            <div className="note-tool-item" onClick={onToolBarEditShow}>
+              <span className="iconfont icon-edit"></span>
+              <i>查看笔记</i>
+            </div>
+          ) : null}
+        </>
+      );
+    }
+  }, [
+    action,
+    setState,
+    selectText,
+    updateSelectedMode,
+    onToolBarEditShow,
+    onToolPaneAdd,
+  ]);
 
   return (
     <div style={{ padding: ' 0 50px' }}>
@@ -284,6 +332,9 @@ const App = () => {
               }}
             ></textarea>
             <button onClick={handleSubmitNote}>提交</button>
+            {selectedUpdateNoteID ? (
+              <button onClick={handleDeleteNote}>删除</button>
+            ) : null}
           </div>
         </ToolBar>
       </Note>

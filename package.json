@@ -1,5 +1,5 @@
 {
-    "version": "0.0.1",
+    "version": "0.0.2",
     "license": "MIT",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
@@ -23,7 +23,7 @@
         "react": ">=16"
     },
     "husky": {
-        "hooks-iweijie": {
+        "hooks": {
             "pre-commit": "tsdx lint"
         }
     },
@@ -36,8 +36,7 @@
     "name": "react-web-highlighter",
     "author": "iweijie",
     "module": "dist/web-text.esm.js",
-    "size-limit": [
-        {
+    "size-limit": [{
             "path": "dist/web-text.cjs.production.min.js",
             "limit": "10 KB"
         },

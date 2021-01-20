@@ -21,8 +21,6 @@ import { INote, INoteTextHighlightInfo } from './type';
 import Parse from '../Parse/index';
 import './index.less';
 
-let selectedValue: any;
-
 const Note: FC<INote> = ({
   template,
   value,
@@ -48,6 +46,8 @@ const Note: FC<INote> = ({
     return { __html: '' };
   });
 
+  const selectedValue = useRef<INoteTextHighlightInfo | null>(null);
+  const action = useRef<string>('');
   const noteContainer = useRef<HTMLDivElement>(null);
   const wrapContainer = useRef<HTMLDivElement>(null);
 
@@ -78,7 +78,8 @@ const Note: FC<INote> = ({
       text: text,
     };
 
-    selectedValue = data;
+    action.current = 'add';
+    selectedValue.current = data;
 
     onAdd(data);
   }, [noteContainer, modes, parse]);
@@ -109,6 +110,7 @@ const Note: FC<INote> = ({
         }
       });
 
+      action.current = 'update';
       onUpdate(findData);
     },
     [noteContainer, value]
@@ -134,8 +136,9 @@ const Note: FC<INote> = ({
     return {
       selectedValue,
       wrapContainer,
+      action,
     };
-  }, [selectedValue, wrapContainer]);
+  }, [selectedValue, action, wrapContainer]);
 
   useEffect(() => {
     // TODO 不造是否有更好的设置值的方式，后续如果有再修改

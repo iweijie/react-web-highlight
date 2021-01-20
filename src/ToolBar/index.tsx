@@ -1,11 +1,4 @@
-import React, {
-  useRef,
-  ReactNode,
-  useContext,
-  FC,
-  useEffect,
-  ReactEventHandler,
-} from 'react';
+import React, { useRef, useContext, FC, useEffect } from 'react';
 import useSetState from '../hooks/useSetState';
 import context from '../Note/context';
 import { marginVertical } from '../constants';
@@ -27,18 +20,7 @@ const ToolBar: FC<IToolBarProps> = props => {
     ...other
   } = props;
 
-  const action = 'add';
-
-  const [state, setState] = useSetState<IToolBarState>({
-    action: undefined,
-    selectText: null,
-    visible: false,
-    position: [0, 0],
-    toolClassName: '',
-  });
-
-  const { wrapContainer } = useContext(context) || {};
-  // const { action, selectText } = state;
+  const { wrapContainer, selectedValue, action } = useContext(context) || {};
 
   const toolContainer = useRef<HTMLDivElement>(null);
 
@@ -52,10 +34,13 @@ const ToolBar: FC<IToolBarProps> = props => {
 
     let range: Range | undefined;
 
-    if (action === 'add') {
-      range = window?.getSelection()?.getRangeAt(0);
-    } else if (action === 'update') {
-    }
+    // if (action?.current === 'add') {
+    range = window?.getSelection()?.getRangeAt(0);
+
+    // TODO 不太确定更新时如何处理，所以直接使用当前点击定位
+    // } else if (action?.current === 'update') {
+    //   debugger
+    // }
 
     if (!range) return;
 
