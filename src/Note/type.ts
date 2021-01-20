@@ -16,8 +16,8 @@ export interface INote {
   template: string;
   value?: INoteTextHighlightInfo[];
   tagName?: string;
-  attrName?: string;
-  splitAttrName?: string;
+  // attrName?: string;
+  // splitAttrName?: string;
   onAdd: (props: INoteTextHighlightInfo) => void;
   onUpdate: (props: INoteTextHighlightInfo[]) => void;
   rowKey?: string;

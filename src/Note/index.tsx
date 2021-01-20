@@ -25,7 +25,6 @@ const Note: FC<INote> = ({
   template,
   value,
   tagName = cTag,
-  attrName = cAttr,
   rowKey = customRowKey,
   onAdd,
   onUpdate,
@@ -152,7 +151,7 @@ const Note: FC<INote> = ({
     }
     setCustomValue({
       tagName,
-      attrName,
+      attrName: cAttr,
       rowKey,
       splitAttrName: customSplitAttr,
       selectedAttr: customSelectedAttr,
