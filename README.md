@@ -1,5 +1,5 @@
 <div>
-    <h1 align="center"><code>Web Highlighter</code>&nbsp;&nbsp;🖍️</h1>
+    <h1 align="center"><code>React Web Highlighter</code>&nbsp;&nbsp;🖍️</h1>
     <p align="center">
         <strong>一个富文本高亮笔记前端库，支持高亮文本的持久化存储与还原</strong>
     </p>
@@ -7,7 +7,9 @@
 
 ---
 
-## 1. <a name=''></a>背景
+## 1. <a name=''></a> 灵感
+
+公司需要做前端文书划线编辑等功能，木得法子， GO GO GO !
 
 非常感谢如下两篇文章提供的思路：
 
@@ -160,13 +162,7 @@ yarn start
 | mode      | `string` | 类型                   | 是       |
 | className | `string` | 用于设置当前类型的类名 | 是       |
 
-<hr>
-
-`onAdd` 参数:
-
-| 参数名 | 类型                     | 描述 | 是否必须 |
-| ------ | ------------------------ | ---- | -------- |
-| data   | `INoteTextHighlightInfo` | 类型 | 是       |
+---
 
 ---
 
@@ -185,13 +181,14 @@ yarn start
 
 ---
 
+---
+
 ## 6. <a name='-1'></a> 方法
 
 `setSelectRange` 方法:
 | 参数名 | 类型 | 描述 | 是否必须 |
 | --------- | -------- | ---------------------- | -------- |
 | node | `INoteTextHighlightInfo` | 用于设置原生选中文本的方法 | 是 |
-
 
 ## 7. <a name='-1'></a> TODO
 

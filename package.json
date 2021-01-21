@@ -1,5 +1,9 @@
 {
     "version": "0.0.4",
+    "name": "react-web-highlighter",
+    "description": "✨✨✨ 🖌🖌🖌 一个富文本高亮笔记前端库，支持高亮文本的持久化存储与还原",
+    "author": "iweijie <375030086@qq.com> (https://github.com/weijie9520)",
+    "homepage": "https://github.com/weijie9520/react-web-highlight",
     "license": "MIT",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
@@ -28,8 +32,6 @@
         "singleQuote": true,
         "trailingComma": "es5"
     },
-    "name": "react-web-highlighter",
-    "author": "iweijie",
     "module": "dist/web-text.esm.js",
     "size-limit": [{
             "path": "dist/web-text.cjs.production.min.js",
