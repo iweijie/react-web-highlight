@@ -31,7 +31,7 @@ describe('useWhyDidYouUpdate', () => {
           from: 100,
           to: 1,
         },
-      },
+      }
     );
   });
 

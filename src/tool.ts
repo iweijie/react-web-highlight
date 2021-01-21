@@ -5,6 +5,7 @@ export function escape(html: string): string {
   elem.appendChild(txt);
   return elem.innerHTML;
 }
+
 // 将实体转回为HTML
 export function unescape(str: string): string {
   var elem = document.createElement('div');
@@ -18,8 +19,10 @@ export function unescape(str: string): string {
 
 export function classNames(...arg: any[]): string {
   // @ts-ignore
-  const classNameMap = arg.reduce((classNameMap, name) => {
-    classNameMap as object;
+  const classNameMap: any = {};
+
+  for (let i = 0; i < arg.length; i++) {
+    const name = arg[i];
     if (typeof name === 'string') {
       classNameMap[name] = true;
     } else if (typeof name === 'object') {
@@ -29,8 +32,7 @@ export function classNames(...arg: any[]): string {
         }
       });
     }
-    return classNameMap;
-  }, {});
+  }
 
   return Object.keys(classNameMap).join(' ');
 }

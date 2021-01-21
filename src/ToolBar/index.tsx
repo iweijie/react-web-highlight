@@ -1,12 +1,11 @@
 import React, { useRef, useContext, FC, useEffect } from 'react';
-import useSetState from '../hooks/useSetState';
 import context from '../Note/context';
 import { marginVertical } from '../constants';
 
 import { classNames } from '../tool';
 import insideElement from '../insideElement';
 
-import { IToolBarProps, IToolBarState } from './type';
+import { IToolBarProps } from './type';
 import './index.less';
 
 const ToolBar: FC<IToolBarProps> = props => {
@@ -17,10 +16,9 @@ const ToolBar: FC<IToolBarProps> = props => {
     autoClosable = true,
     wrapClassName,
     onCancel,
-    ...other
   } = props;
 
-  const { wrapContainer, selectedValue, action } = useContext(context) || {};
+  const { wrapContainer, action } = useContext(context) || {};
 
   const toolContainer = useRef<HTMLDivElement>(null);
 
@@ -52,7 +50,7 @@ const ToolBar: FC<IToolBarProps> = props => {
     let top: number;
     let toolClassName: string;
     let left: number;
-    let arrowLeft: number;
+    // let arrowLeft: number;
 
     if (rangeRect.top > marginVertical + toolContainerRect.height) {
       toolClassName = 'up';
@@ -71,19 +69,19 @@ const ToolBar: FC<IToolBarProps> = props => {
 
     if (leftPoint - toolContainerRect.width / 2 < 0) {
       left = 0;
-      arrowLeft = leftPoint < 6 ? 6 : leftPoint;
+      // arrowLeft = leftPoint < 6 ? 6 : leftPoint;
     } else if (
       leftPoint + toolContainerRect.width / 2 >
       wrapContainerRect.width
     ) {
       left = wrapContainerRect.width - toolContainerRect.width;
-      arrowLeft = wrapContainerRect.left - leftPoint < 6 ? 6 : leftPoint;
+      // arrowLeft = wrapContainerRect.left - leftPoint < 6 ? 6 : leftPoint;
     } else {
       left =
         (rangeRect.left + rangeRect.right) / 2 -
         toolContainerRect.width / 2 -
         wrapContainerRect.left;
-      arrowLeft = leftPoint;
+      // arrowLeft = leftPoint;
     }
 
     toolContainer.current.style.top = `${top}px`;
@@ -111,7 +109,7 @@ const ToolBar: FC<IToolBarProps> = props => {
     return () => {
       document.removeEventListener('click', handle);
     };
-  }, [action, visible]);
+  }, [action, autoClosable, onCancel, wrapContainer, visible]);
 
   return (
     <>

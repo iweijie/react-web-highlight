@@ -4,7 +4,10 @@ export type IProps = {
   [key: string]: any;
 };
 
-export default function useWhyDidYouUpdate(componentName: string, props: IProps) {
+export default function useWhyDidYouUpdate(
+  componentName: string,
+  props: IProps
+) {
   const prevProps = useRef<IProps>({});
 
   useEffect(() => {
@@ -12,7 +15,7 @@ export default function useWhyDidYouUpdate(componentName: string, props: IProps)
       const allKeys = Object.keys({ ...prevProps.current, ...props });
       const changedProps: IProps = {};
 
-      allKeys.forEach((key) => {
+      allKeys.forEach(key => {
         if (prevProps.current![key] !== props[key]) {
           changedProps[key] = {
             from: prevProps.current![key],

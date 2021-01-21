@@ -9,7 +9,7 @@
 import { useWhyDidYouUpdate } from 'ahooks';
 import React, { useState } from 'react';
 
-const Demo: React.FC<{ count: number }> = (props) => {
+const Demo: React.FC<{ count: number }> = props => {
   const [randomNum, setRandomNum] = useState(Math.random());
 
   useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...props, randomNum });
@@ -21,7 +21,10 @@ const Demo: React.FC<{ count: number }> = (props) => {
       </div>
       <div>
         randomNum: {randomNum}
-        <button onClick={() => setRandomNum(Math.random)} style={{ marginLeft: 8 }}>
+        <button
+          onClick={() => setRandomNum(Math.random)}
+          style={{ marginLeft: 8 }}
+        >
           🎲
         </button>
       </div>
@@ -36,8 +39,13 @@ export default () => {
     <div>
       <Demo count={count} />
       <div>
-        <button onClick={() => setCount((prevCount) => prevCount - 1)}>count -</button>
-        <button onClick={() => setCount((prevCount) => prevCount + 1)} style={{ marginLeft: 8 }}>
+        <button onClick={() => setCount(prevCount => prevCount - 1)}>
+          count -
+        </button>
+        <button
+          onClick={() => setCount(prevCount => prevCount + 1)}
+          style={{ marginLeft: 8 }}
+        >
           count +
         </button>
       </div>

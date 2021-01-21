@@ -16,7 +16,7 @@ import {
   customSelectedAttr,
 } from '../constants';
 import { setCustomValue } from '../customAttrValue';
-import Context, { INoteContextProps } from './context';
+import Context from './context';
 import { INote, INoteTextHighlightInfo } from './type';
 import Parse from '../Parse/index';
 import './index.less';

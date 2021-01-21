@@ -1,17 +1,4 @@
-import { ReactNode } from 'react';
-import { IModeProps, INoteTextHighlightInfo } from '../Note/type';
-
-interface IToolBarModeOptions {
-  selected: boolean;
-  data: INoteTextHighlightInfo | null;
-  onCancel?: () => void;
-}
-
-export interface IToolBarModes extends IModeProps {
-  name?: string;
-  render?: (options: IToolBarModeOptions) => ReactNode;
-  handle?: (...arg: any[]) => any;
-}
+import { INoteTextHighlightInfo } from '../Note/type';
 
 export interface IToolBarState {
   action: 'add' | 'update' | undefined;
@@ -19,12 +6,6 @@ export interface IToolBarState {
   visible: boolean;
   position: [number, number];
   toolClassName: string;
-}
-
-export interface IToolBarOnChangeOption {
-  payload: INoteTextHighlightInfo;
-  action: IToolBarState['action'];
-  mode: string;
 }
 
 export interface IToolBarProps {

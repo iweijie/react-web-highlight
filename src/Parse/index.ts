@@ -1,9 +1,6 @@
 import getHTML from '../getHTML';
 import FSM from '../parser.js';
-import {
-  customAttr as attr,
-  customTag as tagName,
-} from '../constants';
+import { customAttr as attr, customTag as tagName } from '../constants';
 import { INoteTextHighlightInfo } from '../Note/type';
 
 interface IParseProps {

@@ -28,11 +28,13 @@ yarn add react-web-highlighter
 ## 3. <a name='-1'></a>使用方式
 
 ```JavaScript
+
 import React, { useCallback, useMemo, useState } from "react";
 import TextHighlight from 'react-web-highlighter';
-import * as ReactDOM from "react-dom";
 
-const template = "<p>高亮好难写呀</p>";
+/** Tip: 如果划线木有效果，看看样式是否有添加 */
+
+const template = "<p>我就是一段文本，想记录点什么，然而却又不知道从何时记录起，那就只能默默的埋藏在心底，生根发芽...</p>";
 
 const App = () => {
   const [data, setState] = useState<any>([]);
@@ -44,26 +46,25 @@ const App = () => {
         mode: "huaxian",
         name: "划线",
       },
-      {
-        className: "edit",
-        mode: "edit",
-        name: "笔记",
-      },
     ];
   }, []);
 
   const onAdd = useCallback(
     (selectText) => {
-      setState({
-        selectText,
-      });
+      const d = {
+        ...selectText,
+        mode: 'huaxian',
+        id: Math.random().toString().slice(2)
+      };
+      data.push(d);
+      setState([...data]);
     },
-    [setState]
+    [data]
   );
 
   const onUpdate = useCallback(
     (list = []) => {
-      setState((d) => d);
+      setState((d: any) => d);
     },
     [setState]
   );
@@ -79,9 +80,7 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("root"));
-
-
+export default App;
 
 ```
 
@@ -89,7 +88,7 @@ ReactDOM.render(<App />, document.getElementById("root"));
 
 [一个更复杂的使用示例，请查看仓库的 DEMO 示例（在`example`文件夹中）](https://github.com/weijie9520/react-text-highlight)
 
-DEMO 安装运行（当前使用的是 tsdx）:
+DEMO 安装运行（当前使用的是 [tsdx](https://tsdx.io/)）:
 
 1. 项目根目录：
 
@@ -121,17 +120,15 @@ yarn start
 
 ## 5. <a name='-1'></a>TextHighlight 组件参数说明
 
-配置说明:
-
-| 参数名   | 类型                       | 描述                           | 是否必须 | 默认值 |
-| -------- | -------------------------- | ------------------------------ | -------- | ------ |
-| template | `string`                   | 富文本 HTML 字符串             | 是       | `--`   |
-| value    | `INoteTextHighlightInfo[]` | 高亮的选区数据                 | 否       | `--`   |
-| tagName  | `string`                   | 用于包裹高亮文本的 HTML 标签名 | 否       | `span` |
-| onAdd    | `function`                 | 新增选区时触发的回调           | 否       | `--`   |
-| onUpdate | `function`                 | 选中选区时触发的回调           | 否       | `--`   |
-| rowKey   | `string`                   | 每条数据的唯一值               | 否       | `id`   |
-| modes    | `IModeProps[]`             | 用于区分类型与不同类型设置样式 | 否       | `--`   |
+| 参数名   | 类型                                   | 描述                                                                                                     | 是否必须 | 默认值 |
+| -------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------- | ------ |
+| template | `string`                               | 富文本 HTML 字符串                                                                                       | 是       | `--`   |
+| value    | `INoteTextHighlightInfo[]`             | 高亮的选区数据                                                                                           | 否       | `--`   |
+| tagName  | `string`                               | 用于包裹高亮文本的 HTML 标签名                                                                           | 否       | `span` |
+| onAdd    | `(data:INoteTextHighlightInfo)=>any`   | 新增选区时触发的回调                                                                                     | 否       | `--`   |
+| onUpdate | `(data:INoteTextHighlightInfo[])=>any` | 选中已存在的选区时触发的回调(由于选区会有重叠，所以参数为数组列表，会返回当前标记当前选中选区的所有节点) | 否       | `--`   |
+| rowKey   | `string`                               | 每条数据的唯一值                                                                                         | 否       | `id`   |
+| modes    | `IModeProps[]`                         | 用于区分类型与不同类型设置样式                                                                           | 否       | `--`   |
 
 <hr>
 
@@ -163,7 +160,13 @@ yarn start
 | mode      | `string` | 类型                   | 是       |
 | className | `string` | 用于设置当前类型的类名 | 是       |
 
----
+<hr>
+
+`onAdd` 参数:
+
+| 参数名 | 类型                     | 描述 | 是否必须 |
+| ------ | ------------------------ | ---- | -------- |
+| data   | `INoteTextHighlightInfo` | 类型 | 是       |
 
 ---
 
@@ -182,4 +185,15 @@ yarn start
 
 ---
 
-## 6. <a name='-1'></a> 静态方法
+## 6. <a name='-1'></a> 方法
+
+`setSelectRange` 方法:
+| 参数名 | 类型 | 描述 | 是否必须 |
+| --------- | -------- | ---------------------- | -------- |
+| node | `INoteTextHighlightInfo` | 用于设置原生选中文本的方法 | 是 |
+
+
+## 7. <a name='-1'></a> TODO
+
+1. [ ] 编写测试用例
+2. [ ] 完善交互逻辑
