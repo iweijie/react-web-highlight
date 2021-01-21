@@ -21,5 +21,10 @@
         "@types/react-dom": "^16.8.4",
         "parcel": "^1.12.3",
         "typescript": "^3.4.5"
-    }
+    },
+    "browserslist": [
+        "last 2 versions",
+        "Android >= 4.4",
+        "iOS >= 9"
+    ]
 }

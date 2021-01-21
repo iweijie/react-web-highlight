@@ -84,8 +84,3 @@ const selectRange = (data: INoteTextHighlightInfo) => {
 };
 
 export default selectRange;
-
-/**
- * 将选中的数据转化为 Rang
- * @param param0
- */

@@ -104,7 +104,6 @@ const App = () => {
 
   const onUpdate = useCallback((list = []) => {
     console.log(list);
-
     const hasHuaxian = !isEmpty(list.filter(item => item.mode === 'huaxian'));
     const hasEdit = !isEmpty(list.filter(item => item.mode === 'edit'));
     const huaxian = list.find(item => item.mode === 'huaxian');
@@ -129,6 +128,7 @@ const App = () => {
       param.visible = false;
       param.textAreaVisible = true;
       param.textAreaValue = edit.note;
+      param.selectedUpdateNoteID = edit.id;
     } else if (updateSelectedMode === 1 || updateSelectedMode === 3) {
       param.visible = true;
     }
@@ -200,7 +200,6 @@ const App = () => {
 
   const handleSubmitNote = useCallback(() => {
     setData(data => {
-
       if (action === 'add') {
         const index = data.findIndex(d => d.mode === 'temp');
         const insertData = {
