@@ -1,5 +1,5 @@
 {
-    "version": "0.0.4",
+    "version": "0.0.5",
     "name": "react-web-highlighter",
     "description": "✨✨✨ 🖌🖌🖌 一个富文本高亮笔记前端库，支持高亮文本的持久化存储与还原",
     "author": "iweijie <375030086@qq.com> (https://github.com/weijie9520)",
