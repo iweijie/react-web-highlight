@@ -7,6 +7,9 @@
 
 ---
 
+## 0. <a name=''></a> 在线案例
+[点我点我](http://web-highlight.iweijie.cn/)
+
 ## 1. <a name=''></a> 灵感
 
 公司需要做前端文书划线编辑等功能，木得法子， GO GO GO !
@@ -16,6 +19,8 @@
 [「划线高亮」和「插入笔记」—— 不止是前端知识点](https://zhuanlan.zhihu.com/p/225773857)
 
 [✨ 如何用 JS 实现“划词高亮”的在线笔记功能？✨🖍️](https://juejin.cn/post/6844903827745832967#heading-8)
+
+
 
 ## 2. <a name='-1'></a>安装
 
