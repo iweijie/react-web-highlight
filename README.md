@@ -137,7 +137,7 @@ yarn start
 | rowKey   | `string`                               | 每条数据的唯一值                                                                                         | 否       | `id`   |
 | modes    | `IModeProps[]`                         | 用于区分类型与不同类型设置样式                                                                           | 否       | `--`   |
 
-<hr>
+---
 
 `INoteTextHighlightInfo` 属性:
 
@@ -147,7 +147,7 @@ yarn start
 | text   | `string`                       | 选区选中的文本数据                 | 是       |
 | mode   | `string`                       | 当前数据类型（例如：笔记，画线等） | 否       |
 
-<hr>
+---
 
 `INoteTextHighlightInfoItem` 属性:
 
@@ -158,7 +158,7 @@ yarn start
 | end    | `string`   | 当前选中的结束文本节点的偏移量                     | 是       |
 | text   | `string`   | 当前文本节点选中的文本                             | 是       |
 
-<hr>
+---
 
 `IModeProps` 属性:
 
@@ -166,8 +166,6 @@ yarn start
 | --------- | -------- | ---------------------- | -------- |
 | mode      | `string` | 类型                   | 是       |
 | className | `string` | 用于设置当前类型的类名 | 是       |
-
----
 
 ---
 
@@ -183,8 +181,6 @@ yarn start
 | wrapClassName | `string`    | 设置样式               | 否       | --     |
 | onCancel      | `function`  | 设置关闭的回调         | 否       | --     |
 | children      | `ReactNode` | 弹窗内部的子元素       | 否       | --     |
-
----
 
 ---
 
