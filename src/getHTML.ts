@@ -2,8 +2,8 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { unescape, escape } from './tool';
 import resolveIntersection from './resolveIntersection';
-import { iAst, IAstItem, iAttr } from './parser';
-import { INoteTextHighlightInfo } from './Note/type';
+import type { iAst, IAstItem, iAttr } from './parser';
+import type { INoteTextHighlightInfo } from './Note/type';
 import { getCustomValue } from './customAttrValue';
 
 export interface IType {
