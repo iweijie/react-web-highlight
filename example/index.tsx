@@ -305,7 +305,7 @@ const App = () => {
   ]);
 
   return (
-    <div style={{ padding: ' 0 50px' }}>
+    <div style={{ padding: ' 0 50px', width: '80%', margin:'o auto' }}>
       <Note
         value={data}
         template={template}
