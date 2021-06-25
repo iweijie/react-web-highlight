@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { unescape, escape } from './tool';
 import resolveIntersection from './resolveIntersection';
-import type { iAst, IAstItem, iAttr } from './parser';
+import type { iAst, IAstItem, iAttr } from './Parse';
 import type { INoteTextHighlightInfo } from './Note/type';
 import { getCustomValue } from './customAttrValue';
 
