@@ -36,3 +36,10 @@ export function classNames(...arg: any[]): string {
 
   return Object.keys(classNameMap).join(' ');
 }
+
+export const getDomFromHTMLTemp = (HTMLTemp: string): NodeList => {
+  const div = document.createElement('div');
+  HTMLTemp = HTMLTemp.trim();
+  div.innerHTML = HTMLTemp;
+  return div.childNodes;
+};

@@ -12,7 +12,7 @@ export interface IAstText {
 export interface IAstElement {
   type: 'element';
   tagName: string;
-  parent: IAstElement;
+  parent: IAstElement | null;
   attributes: iAttr[];
   children: iAst;
   [x: string]: any;
