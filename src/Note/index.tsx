@@ -80,7 +80,7 @@ const Note: FC<INote> = ({
     action.current = 'add';
     selectedValue.current = data;
 
-    onAdd(data);
+    onAdd && onAdd(data);
   }, [noteContainer, modes, parse]);
 
   const handleClick = useCallback(
@@ -110,7 +110,7 @@ const Note: FC<INote> = ({
       });
 
       action.current = 'update';
-      onUpdate(findData);
+      onUpdate && onUpdate(findData);
     },
     [noteContainer, value]
   );

@@ -107,15 +107,15 @@ const parse = (template: string) => {
 class Parse {
   template: string;
   ast: (IAstElement | IAstText)[];
-  list: INoteTextHighlightInfo[];
+  // list: INoteTextHighlightInfo[];
   custom: {
     [x: string]: string;
   };
   constructor(props: IParseProps) {
-    const { template, customAttr, customTag, list = [] } = props;
+    const { template, customAttr, customTag } = props;
     this.template = template;
     this.ast = parse(template);
-    this.list = list;
+    // this.list = list;
     this.custom = {
       attrName: customAttr || attr,
       tagName: customTag || tagName,

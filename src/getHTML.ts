@@ -5,6 +5,7 @@ import resolveIntersection from './resolveIntersection';
 import type { iAst, IAstItem, iAttr } from './Parse';
 import type { INoteTextHighlightInfo } from './Note/type';
 import { getCustomValue } from './customAttrValue';
+import { customAttr, customTag, customSplitAttr, customRowKey, customSelectedAttr } from './constants';
 
 export interface IType {
   type: 'start' | 'end';
@@ -28,14 +29,14 @@ export interface ICustomD {
 const getElementHTML = (item: IAstItem) => {
   if (item.type === 'element') {
     const { tagName, attributes, children } = item;
-    const attrStr = attributes
+    const attrStr = isEmpty(attributes) ? '' : ' ' + attributes
       .map(attr => {
         const { value, name } = attr;
         return value ? `${name}="${value}"` : name;
       })
       .join(' ');
     const child = getAstToHTML(children);
-    return `<${tagName} ${attrStr}>${child}</${tagName}>`;
+    return `<${tagName}${attrStr}>${child}</${tagName}>`;
   } else if (item.type === 'text') {
     return item.content;
   }
@@ -59,11 +60,11 @@ const getLastAst = (astItem: IAstItem, path: number): IAstItem => {
 const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
   // TODO 数据合并
   const {
-    tagName,
-    splitAttrName,
-    attrName,
-    selectedAttr,
-    rowKey,
+    tagName = customTag,
+    splitAttrName = customSplitAttr,
+    attrName = customAttr,
+    selectedAttr = customSelectedAttr,
+    rowKey = customRowKey,
     modeClassNames = {},
   } = getCustomValue();
 

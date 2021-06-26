@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`测试划线功能 basic use 1`] = `
+<div
+  class="text-highlight-wrap"
+>
+  <div
+    class="text-highlight"
+    id="text-highlight"
+  />
+</div>
+`;

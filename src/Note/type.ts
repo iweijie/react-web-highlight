@@ -18,8 +18,8 @@ export interface INote {
   tagName?: string;
   // attrName?: string;
   // splitAttrName?: string;
-  onAdd: (props: INoteTextHighlightInfo) => void;
-  onUpdate: (props: INoteTextHighlightInfo[]) => void;
+  onAdd?: (props: INoteTextHighlightInfo) => void;
+  onUpdate?: (props: INoteTextHighlightInfo[]) => void;
   rowKey?: string;
   modes?: IModeProps[];
 }

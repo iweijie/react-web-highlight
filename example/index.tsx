@@ -5,8 +5,8 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import template from './note/1';
-// import template from './note/2';
+// import template from './note/1';
+import template from './note/2';
 import Note from '../src/Note/index';
 import ToolBar from '../src/ToolBar/index';
 import { useSetState, usePersistFn } from 'ahooks';
