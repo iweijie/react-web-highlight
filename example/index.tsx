@@ -5,9 +5,9 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-// import template from './note/1';
-import template from './note/2';
-import Note from '../src/Note/index';
+import template from './note/1';
+// import template from './note/2';
+import Note from '../src/Note';
 import ToolBar from '../src/ToolBar/index';
 import { useSetState, usePersistFn } from 'ahooks';
 import setSelectRange from '../src/setSelectRange';
@@ -306,7 +306,7 @@ const App = () => {
   ]);
 
   return (
-    <div style={{ padding: ' 0 50px', width: '80%', margin:'o auto' }}>
+    <div style={{ padding: ' 0 50px', width: '80%', margin: 'o auto' }}>
       <Note
         value={data}
         template={template}

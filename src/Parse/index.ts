@@ -1,5 +1,5 @@
-import getHTML from '../getHTML';
-import { getDomFromHTMLTemp, escape } from '../tool';
+import getJSON from '../getJSON';
+import { getDomFromHTMLTemp } from '../tool';
 import { customAttr as attr, customTag as tagName } from '../constants';
 import { INoteTextHighlightInfo } from '../Note/type';
 import cloneDeep from 'lodash/cloneDeep';
@@ -35,13 +35,9 @@ export type IAstItem = IAstElement | IAstText;
 
 export type iAst = IAstItem[];
 
-
 type IParseDom = IAstText | IAstElement | null;
 
-const parseDom = (
-  dom: Node,
-  parent: IAstElement | null = null
-): IParseDom => {
+const parseDom = (dom: Node, parent: IAstElement | null = null): IParseDom => {
   if (dom instanceof Element) {
     const element: IAstElement = {
       children: [],
@@ -70,8 +66,8 @@ const parseDom = (
 
     if (childNodes && childNodes.length) {
       for (let i = 0; i < childNodes.length; i++) {
-        const ast = parseDom(childNodes[i], element)
-        if(ast) {
+        const ast = parseDom(childNodes[i], element);
+        if (ast) {
           element.children.push(ast);
         }
       }
@@ -79,14 +75,15 @@ const parseDom = (
 
     return element;
   } else if (dom instanceof Text) {
+    const textContent = dom.textContent || '';
     const text: IAstText = {
       parent: parent as IAstElement,
-      content: escape(dom.textContent || ''),
+      content: textContent,
       type: 'text',
     };
     return text;
-  } else if(dom instanceof Comment) {
-    return null
+  } else if (dom instanceof Comment) {
+    return null;
   }
 
   throw new Error('类型错误');
@@ -96,8 +93,8 @@ const parse = (template: string) => {
   const doms = getDomFromHTMLTemp(template);
   const nodes = [];
   for (let i = 0; i < doms.length; i++) {
-    const ast = parseDom(doms[i])
-    if(ast) {
+    const ast = parseDom(doms[i]);
+    if (ast) {
       nodes.push(ast);
     }
   }
@@ -122,9 +119,14 @@ class Parse {
     };
   }
 
-  getHTML(list?: INoteTextHighlightInfo[]) {
+  // getHTML(list?: INoteTextHighlightInfo[]) {
+  //   const snapshot = cloneDeep(this.ast);
+  //   return getHTML(snapshot, list);
+  // }
+
+  getJSON(list?: INoteTextHighlightInfo[]) {
     const snapshot = cloneDeep(this.ast);
-    return getHTML(snapshot, list);
+    return getJSON(snapshot, list);
   }
 }
 

@@ -1,4 +1,5 @@
 import React, { useRef, useContext, FC, useEffect } from 'react';
+import type {INoteContextProps} from '../Note/context';
 import context from '../Note/context';
 import { marginVertical } from '../constants';
 
@@ -18,12 +19,15 @@ const ToolBar: FC<IToolBarProps> = props => {
     onCancel,
   } = props;
 
-  const { wrapContainer, action } = useContext(context) || {};
+  const wrapContext = useContext(context);
 
   const toolContainer = useRef<HTMLDivElement>(null);
-
   // 用于设置弹窗的显隐
   useEffect(() => {
+    const {
+      wrapContainer,
+      action,
+    } = wrapContext as INoteContextProps || {};
     if (!wrapContainer?.current || !toolContainer.current) return;
 
     toolContainer.current.style.display = visible ? 'flex' : 'none';
@@ -109,8 +113,7 @@ const ToolBar: FC<IToolBarProps> = props => {
     return () => {
       document.removeEventListener('click', handle);
     };
-  }, [action, autoClosable, onCancel, wrapContainer, visible]);
-
+  }, [ autoClosable, onCancel, visible, wrapContext]);
   return (
     <>
       <div
