@@ -112,19 +112,4 @@ describe('测试划线功能', () => {
     expect(toJson(app)).toMatchSnapshot();
 
   });
-
-  it('更新数据', () => {
-    const value = [
-      {
-        list: [{ level: [0, 0], start: 2, end: 8, text: '很长很长很长' }],
-        text: '很长很长很长',
-        mode: 'huaxian',
-        id: '8f5e0551a588f1',
-      },
-    ];
-
-    const app = mount(<Note modes={modes} template={template} value={value} />);
-
-    console.log(app.find('.huaxian').text());
-  });
 });
