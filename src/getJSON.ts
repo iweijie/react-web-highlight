@@ -1,10 +1,16 @@
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import resolveIntersection from './resolveIntersection';
-import type { iAst, IAstItem, iAttr, IAstElement } from './Parse';
-import type { INoteTextHighlightInfo } from './Note/type';
+import { iAst, IAstItem, iAttr, IAstElement } from './Parse';
+import { INoteTextHighlightInfo } from './Note/type';
 import { getCustomValue } from './customAttrValue';
-import { customAttr, customTag, customSplitAttr, customRowKey, customSelectedAttr } from './constants';
+import {
+  customAttr,
+  customTag,
+  customSplitAttr,
+  customRowKey,
+  customSelectedAttr,
+} from './constants';
 
 export interface IType {
   type: 'start' | 'end';
@@ -28,12 +34,15 @@ export interface ICustomD {
 const getElementHTML = (item: IAstItem) => {
   if (item.type === 'element') {
     const { tagName, attributes, children } = item;
-    const attrStr = isEmpty(attributes) ? '' : ' ' + attributes
-      .map(attr => {
-        const { value, name } = attr;
-        return value ? `${name}="${value}"` : name;
-      })
-      .join(' ');
+    const attrStr = isEmpty(attributes)
+      ? ''
+      : ' ' +
+        attributes
+          .map(attr => {
+            const { value, name } = attr;
+            return value ? `${name}="${value}"` : name;
+          })
+          .join(' ');
     const child = getAstToHTML(children);
     return `<${tagName}${attrStr}>${child}</${tagName}>`;
   } else if (item.type === 'text') {
@@ -122,7 +131,6 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
       }
     });
   });
-    
 
   translateNodeList.forEach(item => {
     const { list, node } = item.custom;
@@ -135,66 +143,64 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
       return comparisonText === text;
     });
 
-    const children = resolveIntersection(filterData, content)
-      .map(item => {
-        const { start, end, text, options } = item;
-        // 用于解决文本转标签注入的问题
-        const content = text;
+    const children = resolveIntersection(filterData, content).map(item => {
+      const { start, end, text, options } = item;
+      // 用于解决文本转标签注入的问题
+      const content = text;
 
-        if(isEmpty(options)) {
-          return {
-            content,
-            type: 'text',
-          }
-        }
-        
-      // @ts-ignore
-        const ref: IAstElement = {children:[]};
-
-        const lastNode = options.reduce((parent,option)=>{
-          const { uuid, mode } = option;
-          const item : IAstElement= {
-            type: 'element',
-            tagName,
-            parent: null,
-            attributes: [
-              {
-                name:'class',
-                value : mode ? modeClassNames[mode] : ''
-              },
-              {
-                name:splitAttrName,
-                value : 'true'
-              },
-              {
-                name:selectedAttr,
-                value : uuid
-              },
-            ],
-            children: [],
-          }
-
-          parent.children.push(item)
-
-          return item
-        }, ref)
-
-        lastNode.children.push({
+      if (isEmpty(options)) {
+        return {
           content,
           type: 'text',
-        })
+        };
+      }
 
-        return ref.children[0]
-      })
+      // @ts-ignore
+      const ref: IAstElement = { children: [] };
 
-      item.children.push(...children)
+      const lastNode = options.reduce((parent, option) => {
+        const { uuid, mode } = option;
+        const item: IAstElement = {
+          type: 'element',
+          tagName,
+          parent: null,
+          attributes: [
+            {
+              name: 'class',
+              value: mode ? modeClassNames[mode] : '',
+            },
+            {
+              name: splitAttrName,
+              value: 'true',
+            },
+            {
+              name: selectedAttr,
+              value: uuid,
+            },
+          ],
+          children: [],
+        };
+
+        parent.children.push(item);
+
+        return item;
+      }, ref);
+
+      lastNode.children.push({
+        content,
+        type: 'text',
+      });
+
+      return ref.children[0];
+    });
+
+    item.children.push(...children);
   });
 };
 
-
 const getJSON = (ast: iAst, list?: INoteTextHighlightInfo[]) => {
-     translateAstNodes(ast, list);
-     return ast
+  translateAstNodes(ast, list);
+  return ast;
 };
 
 export default getJSON;

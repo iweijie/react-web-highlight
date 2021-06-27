@@ -24,13 +24,13 @@ describe('测试划线功能', () => {
     },
   ];
 
-  it('basic use', () => {
+  it('basic', () => {
     const wrapper = render(<Note modes={modes} template={template} />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   it('text', () => {
-    const app = mount(<Note modes={modes} template={template} />);
+    const app = render(<Note modes={modes} template={template} />);
     expect(app.text()).toEqual('我是很长很长很长的文本');
   });
 
@@ -45,17 +45,22 @@ describe('测试划线功能', () => {
     ];
 
     const app = mount(<Note modes={modes} template={template} value={value} />);
+
+    expect(app.find('.huaxian').text()).toEqual('很长很长很长');
+
     expect(app.html()).toEqual(
       getHtml(
         '<p>' +
           '<span data-wj-custom-text="true">' +
           '我是' +
-          '<span class="huaxian" data-wj-custom-split="true" data-wj-custom-id="8f5e0551a588f1">很长很长很长</span>' +
+          '<span data-wj-custom-split="true" data-wj-custom-id="8f5e0551a588f1" class="huaxian">很长很长很长</span>' +
           '的文本' +
           '</span>' +
           '</p>'
       )
     );
+    
+    expect(toJson(app)).toMatchSnapshot();
   });
 
   it('多下划线', () => {
@@ -75,6 +80,16 @@ describe('测试划线功能', () => {
     ];
 
     const app = mount(<Note modes={modes} template={template} value={value} />);
+
+    expect(
+      app
+        .find('[data-wj-custom-id="8f5e0551a588f1"]')
+        .find('[data-wj-custom-id="8f5e0551a588f2"]')
+        .text()
+    ).toEqual('长很');
+
+    expect(app.find('[data-wj-custom-id="8f5e0551a588f1"]').length).toBe(3);
+
     expect(app.html()).toEqual(
       getHtml(
         '<p>' +
@@ -92,6 +107,10 @@ describe('测试划线功能', () => {
           '</p>'
       )
     );
+
+    
+    expect(toJson(app)).toMatchSnapshot();
+
   });
 
   it('更新数据', () => {
@@ -104,6 +123,8 @@ describe('测试划线功能', () => {
       },
     ];
 
-    const app = mount(<Note modes={modes} template={template} />);
+    const app = mount(<Note modes={modes} template={template} value={value} />);
+
+    console.log(app.find('.huaxian').text());
   });
 });

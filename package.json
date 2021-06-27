@@ -1,5 +1,5 @@
 {
-    "version": "0.0.4",
+    "version": "0.0.5",
     "name": "react-web-highlighter",
     "description": "✨✨✨ 🖌🖌🖌 一个富文本高亮笔记前端库，支持高亮文本的持久化存储与还原",
     "author": "iweijie <375030086@qq.com> (https://github.com/weijie9520)",
@@ -24,7 +24,8 @@
         "analyze": "size-limit --why"
     },
     "peerDependencies": {
-        "react": ">=16"
+        "react": ">=16",
+        "lodash": ">=4"
     },
     "prettier": {
         "printWidth": 80,
@@ -72,9 +73,6 @@
         "tsdx": "^0.14.1",
         "tslib": "^2.1.0",
         "typescript": "^4.1.3"
-    },
-    "dependencies": {
-        "lodash": "^4.17.21"
     },
     "browserslist": [
         "last 2 versions",
