@@ -1,4 +1,4 @@
-import { ICustomData } from './getHTML';
+import { ICustomData } from './getJSON';
 
 /**
  * 获取交集

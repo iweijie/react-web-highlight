@@ -1,10 +1,16 @@
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import { unescape, escape } from './tool';
 import resolveIntersection from './resolveIntersection';
-import type { iAst, IAstItem, iAttr } from './parser';
-import type { INoteTextHighlightInfo } from './Note/type';
+import { iAst, IAstItem, iAttr, IAstElement } from './Parse';
+import { INoteTextHighlightInfo } from './Note/type';
 import { getCustomValue } from './customAttrValue';
+import {
+  customAttr,
+  customTag,
+  customSplitAttr,
+  customRowKey,
+  customSelectedAttr,
+} from './constants';
 
 export interface IType {
   type: 'start' | 'end';
@@ -28,14 +34,17 @@ export interface ICustomD {
 const getElementHTML = (item: IAstItem) => {
   if (item.type === 'element') {
     const { tagName, attributes, children } = item;
-    const attrStr = attributes
-      .map(attr => {
-        const { value, name } = attr;
-        return value ? `${name}="${value}"` : name;
-      })
-      .join(' ');
+    const attrStr = isEmpty(attributes)
+      ? ''
+      : ' ' +
+        attributes
+          .map(attr => {
+            const { value, name } = attr;
+            return value ? `${name}="${value}"` : name;
+          })
+          .join(' ');
     const child = getAstToHTML(children);
-    return `<${tagName} ${attrStr}>${child}</${tagName}>`;
+    return `<${tagName}${attrStr}>${child}</${tagName}>`;
   } else if (item.type === 'text') {
     return item.content;
   }
@@ -59,18 +68,15 @@ const getLastAst = (astItem: IAstItem, path: number): IAstItem => {
 const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
   // TODO 数据合并
   const {
-    tagName,
-    splitAttrName,
-    attrName,
-    selectedAttr,
-    rowKey,
+    tagName = customTag,
+    splitAttrName = customSplitAttr,
+    attrName = customAttr,
+    selectedAttr = customSelectedAttr,
+    rowKey = customRowKey,
     modeClassNames = {},
   } = getCustomValue();
 
-  const endStr = `</${tagName}>`;
-
   const translateNodeList: IAstItem[] = [];
-
   if (!options || isEmpty(options)) return;
 
   options.forEach((optionItem, index) => {
@@ -129,7 +135,7 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
   translateNodeList.forEach(item => {
     const { list, node } = item.custom;
     // 解决字符转义后路径对应问题
-    const content = unescape(node.content);
+    const content = node.content;
     // 过滤不匹配文本
     const filterData = list.filter((item: ICustomData) => {
       const { start, end, text } = item.d;
@@ -137,42 +143,64 @@ const translateAstNodes = (ast: iAst, options?: INoteTextHighlightInfo[]) => {
       return comparisonText === text;
     });
 
-    const newContext = resolveIntersection(filterData, content)
-      .map(item => {
-        const { start, end, text, options } = item;
-        // 用于解决文本转标签注入的问题
-        const content = escape(text);
+    const children = resolveIntersection(filterData, content).map(item => {
+      const { start, end, text, options } = item;
+      // 用于解决文本转标签注入的问题
+      const content = text;
 
-        const header = options.map(option => {
-          const { uuid, mode } = option;
-          return `<${tagName} class="${
-            mode ? modeClassNames[mode] : ''
-          }" ${splitAttrName}="true" ${selectedAttr}="${uuid}">`;
-        });
-        const footer = options.map(() => {
-          return endStr;
-        });
-        return [...header, content, ...footer].filter(Boolean).join('');
-      })
-      .join('');
+      if (isEmpty(options)) {
+        return {
+          content,
+          type: 'text',
+        };
+      }
 
-    item.children.push({
-      content: newContext,
-      type: 'text',
+      // @ts-ignore
+      const ref: IAstElement = { children: [] };
+
+      const lastNode = options.reduce((parent, option) => {
+        const { uuid, mode } = option;
+        const item: IAstElement = {
+          type: 'element',
+          tagName,
+          parent: null,
+          attributes: [
+            {
+              name: 'class',
+              value: mode ? modeClassNames[mode] : '',
+            },
+            {
+              name: splitAttrName,
+              value: 'true',
+            },
+            {
+              name: selectedAttr,
+              value: uuid,
+            },
+          ],
+          children: [],
+        };
+
+        parent.children.push(item);
+
+        return item;
+      }, ref);
+
+      lastNode.children.push({
+        content,
+        type: 'text',
+      });
+
+      return ref.children[0];
     });
+
+    item.children.push(...children);
   });
 };
 
-// 笔记与ast 的融和
-const getFormatAst = (ast: iAst, options?: INoteTextHighlightInfo[]): iAst => {
-  // TODO 将笔记插入到ast中
-  translateAstNodes(ast, options);
+const getJSON = (ast: iAst, list?: INoteTextHighlightInfo[]) => {
+  translateAstNodes(ast, list);
   return ast;
 };
 
-const getHTML = (ast: iAst, list?: INoteTextHighlightInfo[]) => {
-  ast = getFormatAst(ast, list);
-  return getAstToHTML(ast);
-};
-
-export default getHTML;
+export default getJSON;

@@ -1,0 +1,197 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`测试划线功能 basic 1`] = `
+<div
+  class="text-highlight-wrap"
+>
+  <div
+    class="text-highlight"
+    id="text-highlight"
+  >
+    <p>
+      我是很长很长很长的文本
+    </p>
+  </div>
+</div>
+`;
+
+exports[`测试划线功能 单一下划线 1`] = `
+<Note
+  modes={
+    Array [
+      Object {
+        "className": "huaxian",
+        "mode": "huaxian",
+        "name": "划线",
+      },
+      Object {
+        "className": "edit",
+        "mode": "edit",
+        "name": "笔记",
+      },
+    ]
+  }
+  template="<p>我是很长很长很长的文本</p>"
+  value={
+    Array [
+      Object {
+        "id": "8f5e0551a588f1",
+        "list": Array [
+          Object {
+            "end": 8,
+            "level": Array [
+              0,
+              0,
+            ],
+            "start": 2,
+            "text": "很长很长很长",
+          },
+        ],
+        "mode": "huaxian",
+        "text": "很长很长很长",
+      },
+    ]
+  }
+>
+  <div
+    className="text-highlight-wrap"
+  >
+    <div
+      className="text-highlight"
+      id="text-highlight"
+      onClick={[Function]}
+      onMouseDown={[Function]}
+    >
+      <p
+        key="p-0"
+      >
+        <span
+          data-wj-custom-text="true"
+          key="span-0"
+        >
+          我是
+          <span
+            className="huaxian"
+            data-wj-custom-id="8f5e0551a588f1"
+            data-wj-custom-split="true"
+            key="span-1"
+          >
+            很长很长很长
+          </span>
+          的文本
+        </span>
+      </p>
+    </div>
+  </div>
+</Note>
+`;
+
+exports[`测试划线功能 多下划线 1`] = `
+<Note
+  modes={
+    Array [
+      Object {
+        "className": "huaxian",
+        "mode": "huaxian",
+        "name": "划线",
+      },
+      Object {
+        "className": "edit",
+        "mode": "edit",
+        "name": "笔记",
+      },
+    ]
+  }
+  template="<p>我是很长很长很长的文本</p>"
+  value={
+    Array [
+      Object {
+        "id": "8f5e0551a588f1",
+        "list": Array [
+          Object {
+            "end": 8,
+            "level": Array [
+              0,
+              0,
+            ],
+            "start": 2,
+            "text": "很长很长很长",
+          },
+        ],
+        "mode": "huaxian",
+        "text": "很长很长很长",
+      },
+      Object {
+        "id": "8f5e0551a588f2",
+        "list": Array [
+          Object {
+            "end": 5,
+            "level": Array [
+              0,
+              0,
+            ],
+            "start": 3,
+            "text": "长很",
+          },
+        ],
+        "mode": "huaxian",
+        "text": "长很",
+      },
+    ]
+  }
+>
+  <div
+    className="text-highlight-wrap"
+  >
+    <div
+      className="text-highlight"
+      id="text-highlight"
+      onClick={[Function]}
+      onMouseDown={[Function]}
+    >
+      <p
+        key="p-0"
+      >
+        <span
+          data-wj-custom-text="true"
+          key="span-0"
+        >
+          我是
+          <span
+            className="huaxian"
+            data-wj-custom-id="8f5e0551a588f1"
+            data-wj-custom-split="true"
+            key="span-1"
+          >
+            很
+          </span>
+          <span
+            className="huaxian"
+            data-wj-custom-id="8f5e0551a588f1"
+            data-wj-custom-split="true"
+            key="span-2"
+          >
+            <span
+              className="huaxian"
+              data-wj-custom-id="8f5e0551a588f2"
+              data-wj-custom-split="true"
+              key="span-0"
+            >
+              长很
+            </span>
+          </span>
+          <span
+            className="huaxian"
+            data-wj-custom-id="8f5e0551a588f1"
+            data-wj-custom-split="true"
+            key="span-3"
+          >
+            长很长
+          </span>
+          的文本
+        </span>
+      </p>
+    </div>
+  </div>
+</Note>
+`;

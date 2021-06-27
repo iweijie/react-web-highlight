@@ -6,7 +6,6 @@ import React, {
   FC,
   useEffect,
 } from 'react';
-import useUpdateEffect from '../hooks/useUpdateEffect';
 import getSelectedInfo from '../getSelectedInfo';
 import {
   customTag as cTag,
@@ -18,8 +17,42 @@ import {
 import { setCustomValue } from '../customAttrValue';
 import Context from './context';
 import { INote, INoteTextHighlightInfo } from './type';
-import Parse from '../Parse/index';
+import Parse, { IAstItem } from '../Parse/index';
 import './index.less';
+import { isEmpty } from 'lodash';
+
+const getContext = (snapShoot: IAstItem[]) => {
+  const nodes: any = [];
+
+  for (let i = 0; i < snapShoot.length; i++) {
+    const node = snapShoot[i];
+    if (node.type === 'text') {
+      nodes.push(node.content);
+    } else if (node.type === 'element') {
+      let children = [];
+      if (!isEmpty(node.children)) {
+        children = getContext(node.children);
+      }
+      const props = node.attributes.reduce((attrs: any, attribute) => {
+        if (attribute.name === 'class') {
+          attrs.className = attribute.value;
+        } else {
+          attrs[attribute.name] = attribute.value;
+        }
+
+        return attrs;
+      }, {});
+
+      props.key = `${node.tagName}-${i}`;
+
+      nodes.push(React.createElement(node.tagName, props, ...children));
+    } else {
+      throw new Error('类型错误');
+    }
+  }
+
+  return nodes;
+};
 
 const Note: FC<INote> = ({
   template,
@@ -41,15 +74,19 @@ const Note: FC<INote> = ({
     return new Parse({ template });
   }, []);
 
-  const [snapShoot, setSnapShoot] = useState(() => {
-    return { __html: '' };
+  const [snapShoot, setSnapShoot] = useState<IAstItem[]>(() => {
+    return parse.getJSON(value);
   });
-
   const selectedValue = useRef<INoteTextHighlightInfo | null>(null);
   const action = useRef<string>('');
   const noteContainer = useRef<HTMLDivElement>(null);
   const wrapContainer = useRef<HTMLDivElement>(null);
 
+  const [contextValue, setContextValue] = useState({
+    selectedValue,
+    wrapContainer,
+    action,
+  });
   const handleSelectedText = useCallback(() => {
     const range: Range | undefined = window?.getSelection()?.getRangeAt(0);
     if (!range) return;
@@ -80,7 +117,7 @@ const Note: FC<INote> = ({
     action.current = 'add';
     selectedValue.current = data;
 
-    onAdd(data);
+    onAdd && onAdd(data);
   }, [noteContainer, modes, parse]);
 
   const handleClick = useCallback(
@@ -110,7 +147,7 @@ const Note: FC<INote> = ({
       });
 
       action.current = 'update';
-      onUpdate(findData);
+      onUpdate && onUpdate(findData);
     },
     [noteContainer, value]
   );
@@ -131,12 +168,12 @@ const Note: FC<INote> = ({
     [noteContainer]
   );
 
-  const contextValue = useMemo(() => {
-    return {
+  useEffect(() => {
+    setContextValue({
       selectedValue,
-      wrapContainer,
       action,
-    };
+      wrapContainer,
+    });
   }, [selectedValue, action, wrapContainer]);
 
   useEffect(() => {
@@ -157,8 +194,7 @@ const Note: FC<INote> = ({
       selectedAttr: customSelectedAttr,
       modeClassNames,
     });
-
-    setSnapShoot({ __html: parse.getHTML(value) });
+    setSnapShoot(parse.getJSON(value));
   }, [setSnapShoot, parse, value, modes]);
 
   return (
@@ -170,8 +206,9 @@ const Note: FC<INote> = ({
           ref={noteContainer}
           onMouseDown={handleMouseDown}
           onClick={handleClick}
-          dangerouslySetInnerHTML={snapShoot}
-        />
+        >
+          {getContext(snapShoot)}
+        </div>
         {children}
       </div>
     </Context.Provider>
