@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { shallow, render, mount } from 'enzyme';
+import { render, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import Note from '../src/Note';
 
@@ -59,7 +59,7 @@ describe('测试划线功能', () => {
           '</p>'
       )
     );
-    
+
     expect(toJson(app)).toMatchSnapshot();
   });
 
@@ -80,6 +80,7 @@ describe('测试划线功能', () => {
     ];
 
     const app = mount(<Note modes={modes} template={template} value={value} />);
+    app.update();
 
     expect(
       app
@@ -89,6 +90,11 @@ describe('测试划线功能', () => {
     ).toEqual('长很');
 
     expect(app.find('[data-wj-custom-id="8f5e0551a588f1"]').length).toBe(3);
+    
+    const testText = ['很', '长很', '长很长']
+    app.find('[data-wj-custom-id="8f5e0551a588f1"]').forEach((node, index) => {
+      expect(node.text()).toEqual(testText[index]);
+    });
 
     expect(app.html()).toEqual(
       getHtml(
@@ -108,8 +114,31 @@ describe('测试划线功能', () => {
       )
     );
 
-    
     expect(toJson(app)).toMatchSnapshot();
+  });
 
+  it('测试修改props，dom结构更新', () => {
+    const value = [
+      {
+        list: [{ level: [0, 0], start: 2, end: 8, text: '很长很长很长' }],
+        text: '很长很长很长',
+        mode: 'huaxian',
+        id: '8f5e0551a588f1',
+      },
+    ];
+
+    const app = mount(<Note modes={modes} template={template} />);
+    app.update();
+
+    expect(app.find('.huaxian').length).toBe(0);
+
+    app.setProps({
+      value,
+    });
+    app.update();
+
+    expect(app.find('.huaxian').length).toBe(1);
+
+    expect(app.find('.huaxian').text()).toEqual('很长很长很长');
   });
 });
