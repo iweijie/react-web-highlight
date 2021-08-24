@@ -7,10 +7,10 @@
 
 ---
 
-## 0. <a name=''></a> 在线案例
+## 0. 在线案例
 [点我点我](http://web-highlight.iweijie.cn/)
 
-## 1. <a name=''></a> 灵感
+## 1. 灵感
 
 非常感谢如下两篇文章提供的思路：
 
@@ -20,7 +20,7 @@
 
 
 
-## 2. <a name='-1'></a>安装
+## 2. 安装
 
 ```bash
 npm i react-web-highlighter
@@ -30,7 +30,7 @@ npm i react-web-highlighter
 yarn add react-web-highlighter
 ```
 
-## 3. <a name='-1'></a>使用方式
+## 3. 使用方式
 
 ```JavaScript
 
@@ -89,7 +89,7 @@ export default App;
 
 ```
 
-## 4. <a name='-1'></a>示例
+## 4. 示例
 
 [一个更复杂的使用示例，请查看仓库的 DEMO 示例（在`example`文件夹中）](https://github.com/weijie9520/react-text-highlight)
 
@@ -123,73 +123,68 @@ yarn start
 
 ---
 
-## 5. <a name='-1'></a>TextHighlight 组件参数说明
+## 5. `TextHighlight`组件参数说明
 
-| 参数名   | 类型                                   | 描述                                                                                                     | 是否必须 | 默认值 |
-| -------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------- | ------ |
-| template | `string`                               | 富文本 HTML 字符串                                                                                       | 是       | `--`   |
-| value    | `INoteTextHighlightInfo[]`             | 高亮的选区数据                                                                                           | 否       | `--`   |
-| tagName  | `string`                               | 用于包裹高亮文本的 HTML 标签名                                                                           | 否       | `span` |
-| onAdd    | `(data:INoteTextHighlightInfo)=>any`   | 新增选区时触发的回调                                                                                     | 否       | `--`   |
-| onUpdate | `(data:INoteTextHighlightInfo[])=>any` | 选中已存在的选区时触发的回调(由于选区会有重叠，所以参数为数组列表，会返回当前标记当前选中选区的所有节点) | 否       | `--`   |
-| rowKey   | `string`                               | 每条数据的唯一值                                                                                         | 否       | `id`   |
-| modes    | `IModeProps[]`                         | 用于区分类型与不同类型设置样式                                                                           | 否       | `--`   |
+- `TextHighlight`组件属性
 
----
+    | 参数名   | 类型                                   | 描述                                                                                                     | 是否必须 | 默认值 |
+    | -------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------- | ------ |
+    | template | `string`                               | 富文本 HTML 字符串                                                                                       | 是       | `--`   |
+    | value    | `INoteTextHighlightInfo[]`             | 高亮的选区数据                                                                                           | 否       | `--`   |
+    | tagName  | `string`                               | 用于包裹高亮文本的 HTML 标签名                                                                           | 否       | `span` |
+    | onAdd    | `(data:INoteTextHighlightInfo)=>any`   | 新增选区时触发的回调                                                                                     | 否       | `--`   |
+    | onUpdate | `(data:INoteTextHighlightInfo[])=>any` | 选中已存在的选区时触发的回调(由于选区会有重叠，所以参数为数组列表，会返回当前标记当前选中选区的所有节点) | 否       | `--`   |
+    | rowKey   | `string`                               | 每条数据的唯一值                                                                                         | 否       | `id`   |
+    | modes    | `IModeProps[]`                         | 用于区分类型与不同类型设置样式                                                                           | 否       | `--`   |
 
-`INoteTextHighlightInfo` 属性:
 
-| 参数名 | 类型                           | 描述                               | 是否必须 |
-| ------ | ------------------------------ | ---------------------------------- | -------- |
-| list   | `INoteTextHighlightInfoItem[]` | 选区数据                           | 是       |
-| text   | `string`                       | 选区选中的文本数据                 | 是       |
-| mode   | `string`                       | 当前数据类型（例如：笔记，画线等） | 否       |
+- `INoteTextHighlightInfo` 类型属性:
 
----
+  | 参数名 | 类型                           | 描述                               | 是否必须 |
+  | ------ | ------------------------------ | ---------------------------------- | -------- |
+  | list   | `INoteTextHighlightInfoItem[]` | 选区数据                           | 是       |
+  | text   | `string`                       | 选区选中的文本数据                 | 是       |
+  | mode   | `string`                       | 当前数据类型（例如：笔记，画线等） | 否       |
 
-`INoteTextHighlightInfoItem` 属性:
+- `INoteTextHighlightInfoItem` 类型属性:
 
-| 参数名 | 类型       | 描述                                               | 是否必须 |
-| ------ | ---------- | -------------------------------------------------- | -------- |
-| level  | `number[]` | 选区层级数据，依据顶级节点一层层下钻到选中文本节点 | 是       |
-| start  | `number`   | 当前选中的开始文本节点的偏移量                     | 是       |
-| end    | `string`   | 当前选中的结束文本节点的偏移量                     | 是       |
-| text   | `string`   | 当前文本节点选中的文本                             | 是       |
+  | 参数名 | 类型       | 描述                                               | 是否必须 |
+  | ------ | ---------- | -------------------------------------------------- | -------- |
+  | level  | `number[]` | 选区层级数据，依据顶级节点一层层下钻到选中文本节点 | 是       |
+  | start  | `number`   | 当前选中的开始文本节点的偏移量                     | 是       |
+  | end    | `string`   | 当前选中的结束文本节点的偏移量                     | 是       |
+  | text   | `string`   | 当前文本节点选中的文本                             | 是       |
 
----
 
-`IModeProps` 属性:
+- `IModeProps` 类型属性:
 
-| 参数名    | 类型     | 描述                   | 是否必须 |
-| --------- | -------- | ---------------------- | -------- |
-| mode      | `string` | 类型                   | 是       |
-| className | `string` | 用于设置当前类型的类名 | 是       |
+  | 参数名    | 类型     | 描述                   | 是否必须 |
+  | --------- | -------- | ---------------------- | -------- |
+  | mode      | `string` | 类型                   | 是       |
+  | className | `string` | 用于设置当前类型的类名 | 是       |
 
----
-
-## 5.1 <a name='-1'></a> ToolBar 组件参数说明
+## 5.1  ToolBar 组件参数说明
 
 > ToolBar 需作为 TextHighlight 的子元素存在
 
-| 参数名        | 类型        | 描述                   | 是否必须 | 默认值 |
-| ------------- | ----------- | ---------------------- | -------- | ------ |
-| mask          | `boolean`   | 是否显示遮罩层         | 否       | true   |
-| visible       | `boolean`   | 用于控制弹窗的显示隐藏 | 否       | false  |
-| autoClosable  | `boolean`   | 点击自动触发管         | 否       | true   |
-| wrapClassName | `string`    | 设置样式               | 否       | --     |
-| onCancel      | `function`  | 设置关闭的回调         | 否       | --     |
-| children      | `ReactNode` | 弹窗内部的子元素       | 否       | --     |
+  | 参数名        | 类型        | 描述                   | 是否必须 | 默认值 |
+  | ------------- | ----------- | ---------------------- | -------- | ------ |
+  | mask          | `boolean`   | 是否显示遮罩层         | 否       | true   |
+  | visible       | `boolean`   | 用于控制弹窗的显示隐藏 | 否       | false  |
+  | autoClosable  | `boolean`   | 点击自动触发管         | 否       | true   |
+  | wrapClassName | `string`    | 设置样式               | 否       | --     |
+  | onCancel      | `function`  | 设置关闭的回调         | 否       | --     |
+  | children      | `ReactNode` | 弹窗内部的子元素       | 否       | --     |
 
----
 
-## 6. <a name='-1'></a> 方法
+## 6.  方法
 
 `setSelectRange` 方法:
 | 参数名 | 类型 | 描述 | 是否必须 |
 | --------- | -------- | ---------------------- | -------- |
 | node | `INoteTextHighlightInfo` | 用于设置原生选中文本的方法 | 是 |
 
-## 7. <a name='-1'></a> TODO
+## 7.  TODO
 
 1. [x] 编写测试用例
 2. [ ] 完善交互逻辑
