@@ -9,7 +9,7 @@
 
 ## 0. 在线案例
 
-![操作GIF图](http://f.iweijie.cn/56595d2a-1fa5-45a3-bba4-ac0f4d5eee48.gif)
+![操作GIF图](http://f.iweijie.cn/a3d560bd-821a-4dc5-a0f5-1cfd94847967.gif)
 
 [点我点我](http://web-highlight.iweijie.cn/)
 
